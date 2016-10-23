@@ -1,0 +1,261 @@
+@charset "UTF-8";
+
+/* CSSファイルの先頭はこれ(↑)でなければいけない */
+
+/*
+ * a.japan.css
+ */
+
+/* 見えないがマウスイベントは処理する */
+.overlay {
+  fill               : none;
+  pointer-events     : all;
+  overflow           : hidden;
+}
+
+.landmark {
+  fill               : steelblue;
+  fill-opacity       : 0.8;
+  stroke             : #fff;
+  stroke-width       : 0.8px;
+}
+
+.landname {
+  font               : 8pt 'Trebuchet MS', Verdana, Helvetica, Arial, Meiryo, sans-serif;
+  color              : #444;
+  background-color   : #888;
+}
+
+.points {
+/*fill               : steelblue;*/
+  fill-opacity       : 0.8;
+  stroke             : #fff;
+  stroke-width       : 0.8px;
+  pointer-events     : all;
+}
+  .points.alert {
+    fill             : red;
+  }
+  .points:hover {
+    stroke-width     : 1.2px;
+  }
+
+.ptip {
+  background-color      : rgba(68,136,187,0.5);
+  margin                : 5px;
+  height                : 80px;
+  width                 : 180px;
+  padding-left          : 5px; 
+  padding-top           : 5px;
+  -webkit-border-radius : 6px;
+  -moz-border-radius    : 6px;
+  border-radius         : 6px;
+  box-shadow            : 0 0 0.75em 0 #888;
+}
+
+.prefecture {
+  stroke          : #fff;
+  stroke-width    : 1.0px;
+  stroke-linejoin : round;
+  stroke-linecap  : round;
+  cursor          : pointer; /* クリック可能にするならcursorを指定する */
+  pointer-events  : all;
+}
+  .prefecture.active {
+    fill          : #dcc; /* 選択した県の色を返る */
+  }
+  .prefecture:hover {
+    /*fill          : #dcd;*/ /* 色を変えた方が見やすい？ */
+  }
+
+.Hokkaido {
+  fill : #dcd;
+}
+
+.Hiroshima {
+  fill : #dcd;
+}
+
+.Okayama {
+  fill : #dcd;
+}
+
+.Shimane {
+  fill : #dcd;
+}
+
+.Tottori {
+  fill : #dcd;
+}
+
+.Yamaguchi {
+  fill : #dcd;
+}
+
+.Saga {
+  fill : #dcd;
+}
+
+.Fukuoka {
+  fill : #dcd;
+}
+
+.Kumamoto {
+  fill : #dcd;
+}
+
+.Miyazaki {
+  fill : #dcd;
+}
+
+.Ehime {
+  fill : #dcd;
+}
+
+.Kagawa {
+  fill : #dcd;
+}
+
+.Kochi {
+  fill : #dcd;
+}
+
+.Oita {
+  fill : #dcd;
+}
+
+.Tokushima {
+  fill : #dcd;
+}
+
+.Aichi {
+  fill : #dcd;
+}
+
+.Gifu {
+  fill : #dcd;
+}
+
+.Ishikawa {
+  fill : #dcd;
+}
+
+.Mie {
+  fill : #dcd;
+}
+
+.Nagano {
+  fill : #dcd;
+}
+
+.Shizuoka {
+  fill : #dcd;
+}
+
+.Toyama {
+  fill : #dcd;
+}
+
+.Fukui {
+  fill : #dcd;
+}
+
+.Hyōgo {
+  fill : #dcd;
+}
+
+.Hyogo {
+  fill : #dcd;
+}
+
+.Kyoto {
+  fill : #dcd;
+}
+
+.Nara {
+  fill : #dcd;
+}
+
+.Osaka {
+  fill : #dcd;
+}
+
+.Shiga {
+  fill : #dcd;
+}
+
+.Wakayama {
+  fill : #dcd;
+}
+
+.Chiba {
+  fill : #dcd;
+}
+
+.Ibaraki {
+  fill : #dcd;
+}
+
+.Kanagawa {
+  fill : #dcd;
+}
+
+.Saitama {
+  fill : #dcd;
+}
+
+.Tochigi {
+  fill : #dcd;
+}
+
+.Tokyo {
+  fill : #dcd;
+}
+
+.Yamanashi {
+  fill : #dcd;
+}
+
+.Akita {
+  fill : #dcd;
+}
+
+.Aomori {
+  fill : #dcd;
+}
+
+.Fukushima {
+  fill : #dcd;
+}
+
+.Iwate {
+  fill : #dcd;
+}
+
+.Miyagi {
+  fill : #dcd;
+}
+
+.Niigata {
+  fill : #dcd;
+}
+
+.Yamagata {
+  fill : #dcd;
+}
+
+.Nagasaki {
+  fill : #dcd;
+}
+
+.Kagoshima {
+  fill : #dcd;
+}
+
+.Okinawa {
+  fill : #dcd;
+}
+
+.Gunma {
+  fill : #dcd;
+}
