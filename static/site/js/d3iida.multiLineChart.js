@@ -1,0 +1,497 @@
+/* global d3, d3iida */
+
+// マルチライングラフモジュール
+(function() {
+  // 想定しているデータの形はこう→ [ {name:'データ名', values:[データ配列] }, {...
+  d3iida.multiLineChart = function module() {
+    // values配列のオブジェクトで使っているキー。call()前に指定し忘れた場合はこれが使われる
+    var valuesKeyX = 'date';
+    var valuesKeyY = 'temperature';
+
+    // SVGの枠の大きさ
+    var width = 800;
+    var height = 500;
+
+    // 'g'の描画領域となるデフォルトのマージン
+    var margin = {
+      top: 20,
+      right: 100,
+      bottom: 20,
+      left: 100
+    };
+
+    // d3.jsで描画する領域。軸の文字や凡例がはみ出てしまうので、マージンの分だけ小さくしておく。
+    var w = width - margin.left - margin.right;
+    var h = height - margin.top - margin.bottom;
+
+    // スケール関数
+    var xScale; // 初期値は d3.scaleTime();
+    var yScale; // 初期値は d3.scaleLinear();
+
+    // 軸のテキスト
+    var xAxisText = '時刻';
+    var yAxisText = '水温';
+
+    // 軸の補助メモリ数
+    var numTicks = 24;
+
+    // X軸に付与するグリッドライン（Y軸と平行のグリッド線）
+    function make_x_gridlines() {
+      return d3.axisBottom(xScale).ticks(24);
+    }
+
+    // Y軸に付与するグリッドライン（X軸と平行のグリッド線）
+    function make_y_gridlines() {
+      return d3.axisLeft(yScale).ticks(5);
+    }
+
+    // 表示制御
+    var showNameAtLineEnd = false;
+    var showLineDot = false;
+
+    // カスタムイベント
+    var dispatch = d3.dispatch('customHover');
+
+    function exports(_selection) {
+      _selection.each(function(_data) {
+        // データ名だけを取り出して配列を作成しておく
+        var names = _data.map(function(d) {
+          return d.name;
+        });
+        // console.log(names);
+        // ['水深1m', '水深5m']
+
+        // データ名に対して色付けするためのスケール関数
+        var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        // X軸の入力ドメインを求めるために[最小値, 最大値]の配列を作成する
+        // X軸が時系列ならどのデータでも同じではないか、という前提で一つ目のデータだけで処理する
+        var xextent = d3.extent(_data[0].values, function(d) {
+          return d[valuesKeyX]; /* d.date */
+        });
+
+        // X軸方向のスケール関数と、ドメイン-レンジ指定
+        xScale = d3.scaleTime();
+        xScale.domain(xextent).range([0, w]);
+
+        // Y軸の入力ドメインを求めるために[最小値, 最大値]の配列を作成する
+        // 全データの最小値、最大値を探る必要がある
+        var yextent = [
+          d3.min(_data, function(d) {
+            return d3.min(d.values, function(v) {
+              return v[valuesKeyY];
+            });
+          }), // v.temperature
+          d3.max(_data, function(d) {
+            return d3.max(d.values, function(v) {
+              return v[valuesKeyY];
+            });
+          }) // v.temperature
+        ];
+
+        // Y軸方向のスケール関数と、ドメイン-レンジ指定
+        yScale = d3.scaleLinear();
+        yScale.domain(yextent).range([h, 0]).nice();
+
+        // 受け取ったデータを紐付けたSVGを作ることで、複数回call()されたときにSVGの重複作成を防止する
+        var svgAll = d3.select(this).selectAll('svg').data([_data]);
+
+        // ENTER領域
+        // 既存のsvgがないならenter()領域に新規作成
+        var enterG = svgAll.enter()
+          .append('svg').attr('width', width).attr('height', height)
+          .append('g').classed('multiLineChartG', true).attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        // x軸を追加する。クラス名はCSSと合わせる
+        enterG.append('g').attr('class', 'x axis').attr('transform', 'translate(0,' + h + ')')
+          .call(d3.axisBottom(xScale).ticks(12, '%I:%M'));
+
+        // X軸に対してグリッド線を引く(Y軸と平行の線)
+        enterG.append('g').attr('class', 'grid').attr('transform', 'translate(0,' + h + ')')
+          .call(make_x_gridlines().tickSize(-h).tickFormat(''));
+
+        // y軸を追加する。クラス名はCSSと合わせる
+        enterG.append('g').attr('class', 'y axis').call(d3.axisLeft(yScale));
+
+        // Y軸に対してグリッド線を引く(X軸と平行の線)
+        enterG.append('g').attr('class', 'grid').call(make_y_gridlines().tickSize(-w).tickFormat(''));
+
+        // X軸Y軸のラベルを追加
+        if (xAxisText) {
+          enterG.append('text').attr('x', w - 10).attr('y', h - 10).style('text-anchor', 'end').text(xAxisText);
+        }
+        if (yAxisText) {
+          enterG.append('text').attr('transform', 'rotate(-90)').attr('y', 6).attr('dy', '.71em').style('text-anchor', 'end').text(yAxisText);
+        }
+
+        // グラフの曲線となるline()関数を作成する
+        var line = d3.line()
+          .x(function(d) {
+            return xScale(d[valuesKeyX]); // d.date
+          })
+          .y(function(d) {
+            return yScale(d[valuesKeyY]); // d.temperature
+          });
+
+        // グラフ曲線の描画領域となる'g'をデータの数だけ作成する
+        var gg = enterG.selectAll('.line').data(_data).enter().append('g');
+
+        // ggにグラフ曲線のpathを追加する
+        gg
+          .append('path')
+          .attr('class', 'line')
+          .attr('id', function(d) {
+            return 'tag' + d.name.replace(/\s+/g, '');
+          }) // IDにnameを入れて識別できるようにする
+          .attr('d', function(d) {
+            return line(d.values);
+          })
+          .style('stroke', function(d) {
+            return color(d.name);
+          });
+
+        // グラフ曲線の末尾にデータ名を表示する
+        if (showNameAtLineEnd) {
+          gg
+            .append('text')
+            .datum(function(d) {
+              return {
+                name: d.name,
+                value: d.values[d.values.length - 1]
+              };
+            })
+            .attr('transform', function(d) {
+              return 'translate(' + xScale(d.value[valuesKeyX]) + ',' + yScale(d.value[valuesKeyY]) + ')';
+            })
+            .attr('x', 10)
+            .attr('dy', '.35em')
+            .attr('id', function(d) {
+              return 'tag' + d.name.replace(/\s+/g, '');
+            }) // IDにnameを入れて識別できるようにする
+            .text(function(d) {
+              return d.name;
+            });
+        }
+
+        // グラフ曲線上に点を打つ
+        if (showLineDot) {
+          // ggに各データ上に点を打つための領域'g'を追加し、クリップパスを指定する
+          var points = gg.selectAll('.dots').data(_data).enter().append('g');
+          points.selectAll('.linedot')
+            .data(function(d) {
+              // d.valuesだけあれば点を描画できるが、色付けにはnameキーが必要なので新たな配列を作って紐付ける
+              return d.values.map(function(v) {
+                return {
+                  name: d.name,
+                  value: v
+                };
+              });
+            })
+            .enter()
+            .append('circle')
+            .attr('class', 'linedot')
+            .attr('id', function(d) {
+              return 'tag' + d.name.replace(/\s+/g, '');
+            }) // IDにnameを入れて識別できるようにする
+            .attr('r', 6)
+            .attr('stroke', function(d) {
+              return color(d.name);
+            })
+            .attr('transform', function(d) {
+              return 'translate(' + xScale(d.value[valuesKeyX]) + ',' + yScale(d.value[valuesKeyY]) + ')';
+            });
+        }
+
+        // 凡例を作成するための領域'g'を追加する
+        var legend = enterG.selectAll('.legend')
+          .data(function() {
+            return names.map(function(d) {
+              return {
+                name: d,
+                active: true
+              };
+            });
+          })
+          .enter()
+          .append('g')
+          .attr('class', 'legend')
+          .attr('transform', function(d, i) {
+            return 'translate(' + w + ',' + (i * 20 + 20) + ')';
+          });
+
+        legend.append('rect')
+          .attr('x', 16)
+          .attr('width', 16)
+          .attr('height', 16)
+          .style('fill', function(d) {
+            return color(d.name);
+          })
+          .on('click', function(d) {
+            var newOpacity = d.active ? 0 : 1;
+            d3.selectAll('#tag' + d.name.replace(/\s+/g, ''))
+              .transition()
+              .style('opacity', newOpacity);
+            d.active = !d.active;
+          });
+
+        legend.append('text')
+          .attr('x', 16 + 16 + 8)
+          .attr('y', 8)
+          .attr('dy', '.35em')
+          .style('text-anchor', 'head')
+          .text(function(d) {
+            return d.name;
+          });
+
+        // マウスの動きに追従するフォーカスを作成する
+        var focus = enterG.append('g').attr('class', 'focus').style('display', 'none');
+
+        // データの数だけ焦点になる点とテキスト、および横線を作成
+        _data.forEach(function(d, i) {
+          focus.append('g')
+            .attr('class', 'focusPoint' + i)
+            .attr('id', function() {
+              return 'tag' + d.name.replace(/\s+/g, '');
+            }) // IDにnameを入れて識別できるようにする
+            .append('circle')
+            .attr('r', 6);
+          focus.select('.focusPoint' + i)
+            .append('text')
+            .attr('x', 9)
+            .attr('dy', '.35em');
+          focus
+            .append('line')
+            .attr('id', function() {
+              return 'tag' + d.name.replace(/\s+/g, '');
+            }) // IDにnameを入れて識別できるようにする
+            .attr('class', 'focusLineY' + i)
+            .style('stroke', 'blue')
+            .style('stroke-dasharray', '3,3')
+            .style('opacity', 0.5)
+            .attr('x1', 0)
+            .attr('x2', w);
+        });
+
+        // 縦線を追加する
+        focus.append('line')
+          .attr('class', 'focusLineX')
+          .style('stroke', 'blue')
+          .style('stroke-dasharray', '3,3')
+          .style('opacity', 0.5)
+          .attr('y1', 0)
+          .attr('y2', h);
+
+        // ソートされている配列に対して、一番近いところのインデックス番号を返してくれる関数を作成しておく
+        var bisect = d3.bisector(function(d) {
+          return d[valuesKeyX]; /* d.date */
+        }).left;
+
+        // マウスの動きを捕捉するためのオーバーレイを'g'に作成してイベントハンドラを登録する
+        enterG.append('rect')
+          .attr('class', 'overlay')
+          .attr('width', w)
+          .attr('height', h)
+          .on('mouseover', function() {
+            focus.style('display', null);
+          })
+          .on('mouseout', function() {
+            focus.style('display', 'none');
+          })
+          .on('mousemove', function() {
+            var mouseX = xScale.invert(d3.mouse(this)[0]);
+            var series = _data.map(function(d) {
+              var index = bisect(d.values, mouseX, 1, d.values.length - 1);
+              var d0 = d.values[index - 1];
+              var d1 = d.values[index];
+              /* return mouseX - d0.date > d1.date - mouseX ? d1 : d0; */
+              return mouseX - d0[valuesKeyX] > d1[valuesKeyX] - mouseX ? d1 : d0;
+            });
+            var i;
+            for (i = 0; i < series.length; i++) {
+              var selectedFocusPoint = enterG.selectAll('.focusPoint' + i);
+              if (selectedFocusPoint) {
+                selectedFocusPoint.select('text').text(series[i][valuesKeyY]);
+                selectedFocusPoint.attr('transform', 'translate(' + xScale(series[i][valuesKeyX]) + ',' + yScale(series[i][valuesKeyY]) + ')');
+              }
+              var selectedFocusLineY = enterG.selectAll('.focusLineY' + i);
+              if (selectedFocusLineY) {
+                selectedFocusLineY.attr('transform', 'translate(0,' + yScale(series[i][valuesKeyY]) + ')');
+              }
+            }
+            // 縦線をマウスに追従して移動する。最初のデータ(series[0])で処理する。
+            focus.select('.focusLineX').attr('transform', 'translate(' + xScale(series[0][valuesKeyX]) + ',0)');
+          });
+        //
+      }); // _selection.each(function(_data) {
+    } // function exports(_selection) {
+
+    exports.xTickFormat = function(_) {
+      if (!arguments.length) {
+        return xScale.tickFormat();
+      }
+      xScale.tickFormat(_);
+      return this;
+    };
+
+    exports.yTickFormat = function(_) {
+      if (!arguments.length) {
+        return yScale.tickFormat();
+      }
+      yScale.tickFormat(_);
+      return this;
+    };
+
+    exports.numTicks = function(_) {
+      if (!arguments.length) {
+        return numTicks;
+      }
+      numTicks = _;
+      return this;
+    };
+
+    exports.showLineDot = function(_) {
+      if (!arguments.length) {
+        return showLineDot;
+      }
+      showLineDot = _;
+      return this;
+    };
+
+    exports.width = function(_) {
+      if (!arguments.length) {
+        return width;
+      }
+      width = _;
+      return this;
+    };
+
+    exports.height = function(_) {
+      if (!arguments.length) {
+        return height;
+      }
+      height = _;
+      return this;
+    };
+
+    exports.xScale = function(_) {
+      if (!arguments.length) {
+        return xScale;
+      }
+      xScale = _;
+      return this;
+    };
+
+    exports.yScale = function(_) {
+      if (!arguments.length) {
+        return yScale;
+      }
+      yScale = _;
+      return this;
+    };
+
+    exports.xAxisText = function(_) {
+      if (!arguments.length) {
+        return xAxisText;
+      }
+      xAxisText = _;
+      return this;
+    };
+
+    exports.yAxisText = function(_) {
+      if (!arguments.length) {
+        return yAxisText;
+      }
+      yAxisText = _;
+      return this;
+    };
+
+    exports.valuesKeyX = function(_) {
+      if (!arguments.length) {
+        return valuesKeyX;
+      }
+      valuesKeyX = _;
+      return this;
+    };
+
+    exports.valuesKeyY = function(_) {
+      if (!arguments.length) {
+        return valuesKeyY;
+      }
+      valuesKeyY = _;
+      return this;
+    };
+
+    // カスタムイベントを'on'で発火できるようにリバインドする
+    // v3までのやり方
+    // d3.rebind(exports, dispatch, 'on');
+    // v4のやり方
+    exports.on = function() {
+      var value = dispatch.on.apply(dispatch, arguments);
+      return value === dispatch ? exports : value;
+    };
+
+    return exports;
+  };
+
+  // 使い方  <div id='multiLineChart'></div>内にライングラフを描画する
+  d3iida.multiLineChart.example = function() {
+    /*
+     * データ出典
+     *   水産総合研究センター
+     *   リアルタイム海洋情報収集解析システム
+     *   http://buoy.nrifs.affrc.go.jp/top.php
+     */
+    var dataText20150506 = function() {
+      /*EOF*
+      計測時刻  水深 1m  水深 5m
+      23:00  18.01  17.95
+      22:00  18.00  17.97
+      21:00  18.06  18.02
+      20:00  18.08  18.08
+      19:00  18.12  18.09
+      18:00  18.16  18.15
+      17:00  18.19  18.17
+      16:00  18.25  18.21
+      15:00  18.26  18.10
+      14:00  18.00  17.89
+      13:00  18.19  17.80
+      12:00  17.94  17.70
+      11:00  18.07  17.20
+      10:00  17.88  17.20
+      09:00  17.82  17.24
+      08:00  17.69  17.45
+      07:00  17.75  17.77
+      06:00  17.85  17.84
+      05:00  17.82  17.78
+      04:00  17.69  17.71
+      03:00  17.69  17.71
+      02:00  17.84  17.83
+      01:00  17.75  17.77
+      00:00  17.88  17.91
+      *EOF*/
+    }.toString().replace(/(\r)/g, '').split('*EOF*')[1];
+    // 改行コードがCRLFの場合は replace(/(\n)/g, '')
+    // console.log(dataText20150506);
+
+    // データマネージャをインスタンス化
+    var dataManager = d3iida.dataManager();
+
+    // データマネージャにこのテキストを渡してd3.jsに適したデータに変換する
+    dataManager.loadSeaTemperatureFromString(dataText20150506);
+    var data = dataManager.getData();
+    // console.log(data);
+
+    var chart = d3iida.multiLineChart();
+    chart
+      .valuesKeyX('date')
+      .valuesKeyY('temperature')
+      .xAxisText('時刻')
+      .yAxisText('水温')
+      // .xTickFormat(d3.timeFormat('%H:%M'))
+      .numTicks(12)
+      .showLineDot(true);
+
+    d3.select('#multiLineChart').datum(data).call(chart);
+  };
+  //
+})();

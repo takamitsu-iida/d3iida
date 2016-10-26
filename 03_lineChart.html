@@ -15,9 +15,6 @@
   <!-- d3.js v4をインクルード -->
   <script src="./static/d3.4.2.8/d3.js"></script>
 
-  <!-- topojsonをインクルード -->
-  <script src="./static/topojson.1.6.27/topojson.min.js"></script>
-
   <!-- crossfilterをインクルード -->
   <script src="./static/crossfilter-1.3.12/crossfilter.min.js"></script>
 
@@ -26,56 +23,21 @@
 
   <!-- d3iida.jsをインクルード -->
   <script src="./static/site/js/d3iida.js"></script>
+  <script src="./static/site/js/d3iida.lineChart.js"></script>
+
 </head>
 
 <body>
 
-  <div id="wait">
-    <p class="lead"> Please wait while the data loads...there's a lot!</p>
-  </div>
-
-  <div id="ready" style="visibility:hidden">
-    <p class="lead">Ready! Have fun!</p>
-  </div>
-
   <div>
-    <h2>Japan</h2>
-    <div class="vizContainer">
-      <div id="japan_map"></div>
-    </div>
-    <div id="table"></div>
-  </div>
-
-  <br>
-
-  <div>
-    <h2>Hello</h2>
-    <div id="hello"></div>
-  </div>
-
-  <br>
-
-  <div>
-    <h2>BarChart</h2>
-    <div class="chartContainer">
-      <div id="barChart"></div>
-    </div>
-    <div id="barChartMessage"></div>
-  </div>
-
-  <div>
-    <h2>LineChart</h2>
+    <h2>lineChart</h2>
     <div class="chartContainer">
       <div id="lineChart"></div>
     </div>
   </div>
 
   <script>
-    // d3iida.hello.example();
-    // d3iida.barChart.example();
     d3iida.lineChart.example();
-    // d3iida.lineChart.example2();
-    // d3iida.map.example();
   </script>
 
 </body>

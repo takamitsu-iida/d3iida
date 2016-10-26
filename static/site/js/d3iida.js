@@ -1,9 +1,9 @@
-/* global d3, d3iida */
+/* global d3, crossfilter, d3iida */
 
 // グローバルに独自の名前空間を定義する
 (function() {
   // このthisはグローバル空間
-  this.d3iida = (function() {
+  this.d3iida = this.d3iida || (function() {
     // ヒアドキュメント経由で静的データを取り込む場合、テキストデータをheredoc配下にぶら下げる
     var heredoc = {};
 
@@ -72,11 +72,221 @@
   //
 })();
 
+// データマネージャモジュール
+(function() {
+  d3iida.dataManager = function module() {
+    // このモジュールで保持しているデータ
+    var data;
+
+    // 関数ではなくマップを返す
+    var exports = {};
+
+    // カスタムイベント。
+    var dispatch = d3.dispatch('geoReady', 'dataReady', 'dataLoading');
+
+    // 拠点の位置でフィルタするcrossfilter()
+    var siteCrossfilter = crossfilter();
+
+    // crossfilterのディメンジョン定義用の変数。
+    var siteLocation;
+
+    // CSVを読み、データ整形する。
+    exports.loadCsvData = function(_file, _cleaningFunc) {
+      // d3.csv()でCSVファイルを要求する。ローカルファイルは読めないのでサーバが必要。
+      var loadCsv = d3.csv(_file);
+
+      // d3.csv()が発行するprogressイベントをカスタムイベントdataLoadingとして発火させる
+      loadCsv.on('progress', function() {
+        // カスタムイベントをディスパッチする
+        dispatch.call('dataLoading', this, d3.event.loaded);
+      });
+
+      // HTTP GETで取得。非同期処理。
+      loadCsv.get(function(_err, _response) {
+        // _cleaningFuncで渡された関数を実行してデータを整形する
+        _response.forEach(function(d) {
+          _cleaningFunc(d);
+        });
+
+        // dataに整形後のデータを格納する
+        data = _response;
+
+        // 読み込んだCSVデータをCrossfilterに渡すならここで処理。
+        // dataCrossfilter.add(_response);
+        // ディメンジョン定義。データ内のLOCATIONを渡す。
+        // location = dataCrossfilter.dimension(function(d) {
+        //   return d.LOCATION;
+        // });
+
+        // カスタムイベント dataReady を発火させる。
+        dispatch.call('dataReady', this, _response);
+      });
+    };
+
+    // 文字列からデータにする
+    exports.loadSeaTemperatureFromString = function(_string) {
+      // 想定しているデータ。先頭に空白が入るかもしれない。
+      /*
+      計測時刻  水深1m  水深5m
+      23:00  18.01  17.95
+      22:00  18.00  17.97
+      21:00  18.06  18.02
+      20:00  18.08  18.08
+      19:00  18.12  18.09
+      18:00  18.16  18.15
+      17:00  18.19  18.17
+      16:00  18.25  18.21
+      15:00  18.26  18.10
+      14:00  18.00  17.89
+      13:00  18.19  17.80
+      12:00  17.94  17.70
+      11:00  18.07  17.20
+      10:00  17.88  17.20
+      09:00  17.82  17.24
+      08:00  17.69  17.45
+      07:00  17.75  17.77
+      06:00  17.85  17.84
+      05:00  17.82  17.78
+      04:00  17.69  17.71
+      03:00  17.69  17.71
+      02:00  17.84  17.83
+      01:00  17.75  17.77
+      00:00  17.88  17.91
+      */
+
+      /*
+        名前とデータ配列を格納したオブジェクトの配列にする
+        [ { name: depth1m, values: [] },
+          { name: depth5m, values: [] }, ... ]
+
+        values配列はグラフ化するために(x,y)のペアになるようにする
+        [ { date:..., temperature:... },
+          { date:..., temeprature:... }, ... ]
+      */
+
+      // 時刻の書式
+      var parseDate = d3.timeParse('%H:%M');
+
+      // ここで使うキーの一覧
+      var dataKeys = ['date', '水深1m', '水深5m'];
+
+      // 各行のオブジェクト配列
+      var lineDatas = [];
+
+      // 改行で分割して配列にする
+      var lines = _string.split(/\r\n|\r|\n/);
+      // console.log(lines);
+
+      // 各行の中身を正規表現で分割してオブジェクト化する
+      // 元のテキストデータは23時始まりで、行と共に時間が古くなっていくので逆順に処理する
+      var i;
+      for (i = lines.length - 1; i > 0; i--) {
+        var l = lines[i];
+        var matches = l.match(/(\d+:00)\s+(\d{1,2}\.\d{1,2})\s+(\d{1,2}\.\d{1,2})/);
+        if (!matches || matches.length !== 4) {
+          continue;
+        }
+
+        // dataKeysをキーにしたオブジェクト(連想配列)に収める
+        var v = {};
+        v[dataKeys[0]] = parseDate(matches[1]);
+        v[dataKeys[1]] = matches[2];
+        v[dataKeys[2]] = matches[3];
+
+        // それをlineDatas配列に追加していく
+        lineDatas.push(v);
+      }
+
+      // Array.map()は配列の各要素について関数を適用して新たな配列を返す。
+      // ['水深1m', '水深5m']の部分はdataKeys.slice()でもいいし、dataKeys.mapでdateを除外してもいい。
+      data = ['水深1m', '水深5m'].map(function(k) {
+        return {
+          name: k,
+          values: lineDatas.map(function(d) { // dはlineDatasの行
+            return {
+              date: d['date'], // d.date
+              temperature: Number(d[k]) // d.'depth1m' or d.'depth5m'
+            };
+          })
+        };
+      });
+
+      // カスタムイベント dataReady を発火させる。
+      dispatch.call('dataReady', this);
+    };
+
+    // 外部からデータを取得するための公開関数
+    exports.getData = function() {
+      return data;
+    };
+
+    // geojsonファイルを読み終えたらコールバックを呼ぶ公開関数
+    exports.loadGeoJson = function(_file, _callback) {
+      d3.json(_file, function(_err, _data) {
+        if (_data.type === 'FeatureCollection') {
+          // 拠点データと考えて、クロスフィルターをセットアップする
+          siteCrossfilter.add(_data.features);
+          // ディメンジョン定義。データ内の座標を渡す。
+          siteLocation = siteCrossfilter.dimension(function(d) {
+            return d.geometry.coordinates;
+          });
+        }
+
+        _callback(_data);
+
+        // カスタムイベント geoReady を発火させる。
+        dispatch.call('geoReady', this, _data);
+      });
+    };
+
+    // Crossfilterのサイズを返す公開関数
+    exports.getSiteCrossfilterSize = function() {
+      return siteCrossfilter.size();
+    };
+
+    // siteLocationによってフィルタをした結果を返す公開関数
+    exports.filterSiteLocation = function(_locationArea) {
+      if (!siteLocation) {
+        return [];
+      }
+
+      // 境界ボックスからlongitudeの配列にする
+      var longitudes = [_locationArea[0][0], _locationArea[1][0]];
+
+      // 境界ボックスからlatitudeの配列にする
+      var latitudes = [_locationArea[0][1], _locationArea[1][1]];
+
+      siteLocation.filterFunction(function(d) {
+        return d[0] >= longitudes[0] &&
+          d[0] <= longitudes[1] &&
+          d[1] >= latitudes[0] &&
+          d[1] <= latitudes[1];
+      });
+
+      // 境界ボックスに収まる全レコード返す
+      return siteLocation.top(Infinity);
+    };
+
+    // カスタムイベントを'on'で発火できるようにリバインドする
+    // v3までのやり方
+    // d3.rebind(exports, dispatch, 'on');
+    // v4のやり方
+    exports.on = function() {
+      var value = dispatch.on.apply(dispatch, arguments);
+      return value === dispatch ? exports : value;
+    };
+
+    return exports;
+  };
+  //
+})();
+
 // モジュール化の動作確認
 // helloモジュール
 (function() {
   d3iida.hello = function module() {
     // プライベート変数
+    // クロージャで外から設定できるようにする
     var fontSize = 10;
     var fontColor = 'red';
 
@@ -91,10 +301,8 @@
         // _dataは紐付けしたデータそのもの。配列全体。
         d3.select(this)
           .append('div')
-          .styles({
-            'font-size': fontSize + 'px',
-            'color': fontColor
-          })
+          .style('font-size', fontSize + 'px')
+          .style('color', fontColor)
           .html('_data = ' + _data)
           .on('mouseover', function() {
             // カスタムイベントをディスパッチする
@@ -151,198 +359,6 @@
 
     // セレクションにデータを紐付けてcall()する
     d3.select('#hello').datum(dataset).call(hello);
-  };
-  //
-})();
-
-// 棒グラフモジュール
-(function() {
-  d3iida.barChart = function module() {
-    // SVGの枠の大きさ
-    var width = 500;
-    var height = 300;
-
-    // 'g'の描画領域となるデフォルトのマージン
-    var margin = {
-      top: 20,
-      right: 20,
-      bottom: 20,
-      left: 20
-    };
-
-    // d3.jsで描画する領域。軸や凡例がはみ出てしまうので、マージンの分だけ小さくしておく。
-    var w = width - margin.left - margin.right;
-    var h = height - margin.top - margin.bottom;
-
-    // カスタムイベントを登録する
-    var dispatch = d3.dispatch('customHover');
-
-    var i = 0;
-
-    function exports(_selection) {
-      _selection.each(function(_data) {
-        console.log(i);
-        console.log(_data);
-        i++;
-
-        var barW = w / _data.length;
-        var scaling = h / d3.max(_data);
-
-        // 受け取ったデータを紐付けたSVGを作ることで、複数回call()されたときにSVGの重複作成を防止する
-        var svg = d3.select(this).selectAll('svg').data([_data]);
-
-        // ENTER領域
-        // 既存のsvgがないならenter()領域に新規作成
-        svg.enter().append('svg').attr('width', width).attr('height', height).append('g').classed('barChartG', true);
-
-        // 再セレクト
-        svg = d3.select(this).select('svg');
-
-        // svgの大きさを合わせる
-        // 大きさを変更した場合は再度call()
-        svg.attr('width', width).attr('height', height);
-
-        // 'g'を取り出す
-        var g = svg.select('.barChartG');
-
-        // 'g'はマージン分だけ描画領域をずらす
-        g.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-        // transitionインスタンス
-        var t = d3.transition().ease(d3.easeLinear);
-
-        // 棒グラフを'g'内に作成
-        var bars = g.selectAll('.bar')
-          .data(
-            // dは_dataと同じなので、.data(_data)としてもいい
-            function(d, i) {
-              return d;
-            }
-          );
-
-        // ENTER領域
-        bars.enter()
-          .append('rect')
-          .classed('bar', true)
-          .attrs({
-            width: barW,
-            x: w,
-            y: function(d, i) {
-              return h - d * scaling;
-            },
-            height: function(d, i) {
-              return d * scaling;
-            }
-          })
-          .on('mouseover', function(d) {
-            // カスタムイベントをディスパッチする
-            dispatch.call('customHover', this, d);
-          })
-          // ENTER + UPDATE領域
-          .merge(bars)
-          .transition(t)
-          .attrs({
-            width: barW,
-            x: function(d, i) {
-              return i * barW;
-            },
-            y: function(d, i) {
-              return h - d * scaling;
-            },
-            height: function(d, i) {
-              return d * scaling;
-            }
-          });
-
-        bars.exit()
-          .transition(t)
-          .style('opacity', 0)
-          .remove();
-        //
-      });
-    }
-
-    exports.width = function(_) {
-      if (!arguments.length) {
-        return w;
-      }
-      width = _;
-      return this;
-    };
-
-    exports.height = function(_) {
-      if (!arguments.length) {
-        return height;
-      }
-      height = _;
-      return this;
-    };
-
-    // カスタムイベントを'on'で発火できるようにリバインドする
-    // v3までのやり方
-    // d3.rebind(exports, dispatch, 'on');
-    // v4のやり方
-    exports.on = function() {
-      var value = dispatch.on.apply(dispatch, arguments);
-      return value === dispatch ? exports : value;
-    };
-
-    return exports;
-  };
-
-  // 使い方  <div id='barChart'></div>内に棒グラフを描画する
-  d3iida.barChart.example = function() {
-    var data = [10, 20, 30, 40, 50];
-    // var data = d3iida.utils.rndNumbers(50, 100);
-
-    var barChart = d3iida.barChart()
-      .width(500)
-      .height(300)
-      .on('customHover', function(d) {
-        d3.select('#barChartMessage').text(d);
-      });
-
-    // 棒グラフのコンテナは<div id='barChar'>を使う
-    var container = d3.select('#barChart');
-
-    // このセレクションにデータを紐付けてcall()する
-    container.datum(data).call(barChart);
-    // container.call(barChart);
-
-
-    // テスト。繰り返し実行して結果を観察する
-    var doTest = true;
-    var repeat = 0;
-    var dataTimer;
-    var widthTimer;
-
-    // テスト用。データを更新する
-    function updateData() {
-      repeat++;
-      if (repeat === 10) {
-        clearInterval(dataTimer);
-        clearInterval(widthTimer);
-      }
-      data = d3iida.utils.rndNumbers(50, 100);
-
-      // セレクションに新しいdataを紐付けてcall()する
-      container.datum(data).call(barChart);
-    }
-
-    // テスト用。チャートのパラメータ変更（幅）
-    function updateWidth() {
-      // widthとしてランダム値を使う
-      var rnd = d3iida.utils.rndNum(100, 500);
-
-      // チャート側のパラメータを変更して、再度セレクションでcall()
-      container.call(barChart.width(rnd));
-    }
-
-    if (doTest) {
-      dataTimer = setInterval(updateData, 1000);
-      widthTimer = setInterval(updateWidth, 5000);
-    }
-    //
   };
   //
 })();

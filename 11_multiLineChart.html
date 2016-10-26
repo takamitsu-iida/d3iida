@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <!-- IE9以降で正しく機能するようにする -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <title>d3iida.js</title>
+
+  <!-- d3.js v4をインクルード -->
+  <script src="./static/d3.4.2.8/d3.js"></script>
+
+  <!-- crossfilterをインクルード -->
+  <script src="./static/crossfilter-1.3.12/crossfilter.min.js"></script>
+
+  <!-- スタイルシート -->
+  <link rel="stylesheet" href="./static/site/css/d3iida.css" type="text/css">
+
+  <!-- d3iida.jsをインクルード -->
+  <script src="./static/site/js/d3iida.js"></script>
+  <script src="./static/site/js/d3iida.multiLineChart.js"></script>
+
+</head>
+
+<body>
+
+  <div>
+    <h2>マルチラインチャート</h2>
+    <div class="chartContainer">
+      <div id="multiLineChart"></div>
+    </div>
+  </div>
+
+  <script>
+    d3iida.multiLineChart.example();
+  </script>
+
+</body>
+
+</html>

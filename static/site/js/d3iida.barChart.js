@@ -1,0 +1,183 @@
+/* global d3, d3iida */
+
+// 棒グラフモジュール
+(function() {
+  d3iida.barChart = function module() {
+    // SVGの枠の大きさ
+    var width = 500;
+    var height = 300;
+
+    // 'g'の描画領域となるデフォルトのマージン
+    var margin = {
+      top: 20,
+      right: 20,
+      bottom: 20,
+      left: 20
+    };
+
+    // d3.jsで描画する領域。軸や凡例がはみ出てしまうので、マージンの分だけ小さくしておく。
+    var w = width - margin.left - margin.right;
+    var h = height - margin.top - margin.bottom;
+
+    // カスタムイベントを登録する
+    var dispatch = d3.dispatch('customHover');
+
+    function exports(_selection) {
+      _selection.each(function(_data) {
+        var barW = w / _data.length;
+        var scaling = h / d3.max(_data);
+
+        // 受け取ったデータを紐付けたSVGを作ることで、複数回call()されたときにSVGの重複作成を防止する
+        var svgAll = d3.select(this).selectAll('svg').data([_data]);
+
+        // ENTER領域
+        // 既存のsvgがないならenter()領域に新規作成し、描画領域となる'g'を追加
+        var enterG = svgAll.enter().append('svg').attr('width', width).attr('height', height).append('g').classed('barChartG', true);
+
+        // 'g'はマージン分だけ描画領域をずらす
+        enterG.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        // svgをセレクト
+        var svg = d3.select(this).select('svg');
+
+        // svgの大きさを合わせる
+        // 大きさを変更した場合は再度call()
+        svg.attr('width', width).attr('height', height);
+
+        // svg直下の'g'を取り出す
+        var g = svg.select('.barChartG');
+
+        // transitionインスタンス
+        var t = d3.transition().ease(d3.easeLinear);
+
+        // 棒グラフを'g'内に作成
+        var bars = g.selectAll('.bar')
+          .data(
+            // dは_dataと同じなので、.data(_data)としてもいい
+            function(d, i) {
+              return d;
+            }
+          );
+
+        // ENTER領域
+        bars.enter()
+          .append('rect')
+          .classed('bar', true)
+          .attr('width', barW)
+          .attr('x', w)
+          .attr('y', function(d, i) {
+            return h - d * scaling;
+          })
+          .attr('height', function(d, i) {
+            return d * scaling;
+          })
+          .on('mouseover', function(d) {
+            // カスタムイベントをディスパッチする
+            dispatch.call('customHover', this, d);
+          })
+          // ENTER + UPDATE領域
+          .merge(bars)
+          .transition(t)
+          .attr('width', barW)
+          .attr('x', function(d, i) {
+            return i * barW;
+          })
+          .attr('y', function(d, i) {
+            return h - d * scaling;
+          })
+          .attr('height', function(d, i) {
+            return d * scaling;
+          });
+
+        bars.exit()
+          .transition(t)
+          .style('opacity', 0)
+          .remove();
+        //
+      });
+    }
+
+    exports.width = function(_) {
+      if (!arguments.length) {
+        return width;
+      }
+      width = _;
+      w = width - margin.left - margin.right;
+      return this;
+    };
+
+    exports.height = function(_) {
+      if (!arguments.length) {
+        return height;
+      }
+      height = _;
+      h = height - margin.top - margin.bottom;
+      return this;
+    };
+
+    // カスタムイベントを'on'で発火できるようにリバインドする
+    // v3までのやり方
+    // d3.rebind(exports, dispatch, 'on');
+    // v4のやり方
+    exports.on = function() {
+      var value = dispatch.on.apply(dispatch, arguments);
+      return value === dispatch ? exports : value;
+    };
+
+    return exports;
+  };
+
+  // 使い方  <div id='barChart'></div>内に棒グラフを描画する
+  d3iida.barChart.example = function() {
+    var data = [10, 20, 30, 40, 50];
+    // var data = d3iida.utils.rndNumbers(50, 100);
+
+    var barChart = d3iida.barChart()
+      .width(500)
+      .height(300)
+      .on('customHover', function(d) {
+        d3.select('#barChartMessage').text(d);
+      });
+
+    // グラフのコンテナは<div id='barChar'>を使う
+    var container = d3.select('#barChart');
+
+    // コンテナのセレクションにデータを紐付けてcall()する
+    container.datum(data).call(barChart);
+
+    // テスト。繰り返し実行して結果を観察する
+    var doTest = true;
+    if (doTest) {
+      var repeat = 0;
+      var dataTimer;
+      var widthTimer;
+
+      // テスト用。データを更新する
+      var updateData = function() {
+        repeat++;
+        if (repeat === 10) {
+          clearInterval(dataTimer);
+          clearInterval(widthTimer);
+        }
+        data = d3iida.utils.rndNumbers(50, 100);
+
+        // セレクションに新しいdataを紐付けてcall()する
+        container.datum(data).call(barChart);
+      };
+
+      // テスト用。チャートのパラメータ変更（幅）
+      var updateWidth = function() {
+        // widthとしてランダム値を使う
+        var rnd = d3iida.utils.rndNum(100, 500);
+
+        // チャート側のパラメータを変更して、再度セレクションでcall()
+        container.call(barChart.width(rnd));
+      };
+
+      dataTimer = setInterval(updateData, 1000);
+      widthTimer = setInterval(updateWidth, 5000);
+    }
+   //
+  };
+  //
+})();

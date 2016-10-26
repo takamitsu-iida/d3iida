@@ -77,7 +77,7 @@ strong {
   font-size: 12px;
 }
 
-.grid .tick {
+.grid line {
   stroke: lightgrey;
   stroke-width: 0.5px;
 }
