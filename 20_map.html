@@ -12,26 +12,34 @@
   <!-- d3.js v4をインクルード -->
   <script src="./static/d3.4.2.8/d3.min.js"></script>
 
+  <!-- topojsonをインクルード -->
+  <script src="./static/topojson.1.6.27/topojson.min.js"></script>
+
+  <!-- crossfilterをインクルード -->
+  <script src="./static/crossfilter-1.3.12/crossfilter.min.js"></script>
+
   <!-- スタイルシート -->
   <link rel="stylesheet" href="./static/site/css/d3iida.css" type="text/css">
 
   <!-- d3iida.jsをインクルード -->
   <script src="./static/site/js/d3iida.js"></script>
-  <script src="./static/site/js/d3iida.pieChart.js"></script>
-
+  <script src="./static/site/js/d3iida.geodata.japan.js"></script>
+  <script src="./static/site/js/d3iida.geodata.prefectures.js"></script>
+  <script src="./static/site/js/d3iida.mapChart.js"></script>
 </head>
 
 <body>
 
   <div>
-    <h2>pieChart</h2>
-    <div class="chartContainer">
-      <div id="pieChart"></div>
+    <h2>Japan</h2>
+    <div class="vizContainer">
+      <div id="mapChart"></div>
     </div>
+    <div id="table"></div>
   </div>
 
   <script>
-    d3iida.pieChart.example();
+    d3iida.mapChart.example();
   </script>
 
 </body>

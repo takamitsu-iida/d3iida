@@ -109,31 +109,7 @@ strong {
   shape-rendering: crispEdges;
 }
 
-/* 地図。あとでa.japan.cssに移動する */
-
 .vizContainer {
   border: 1px solid gray;
   overflow: hidden;
 }
-
-#figure {
-  margin: auto;
-}
-
-.brush .extent {
-  stroke: #000;
-  fill-opacity: .125;
-  shape-rendering: crispEdges;
-}
-
-.sites {
-/*fill               : steelblue;*/
-  fill-opacity       : 0.8;
-  stroke             : #fff;
-  stroke-width       : 0.8px;
-  pointer-events     : all;
-}
-  .sites:hover {
-    stroke-width     : 1.2px;
-  }
-

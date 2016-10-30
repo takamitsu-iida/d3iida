@@ -2,8 +2,8 @@
 
 // マルチライングラフモジュール
 (function() {
-  // 想定しているデータの形はこう→ [ {name:'データ名', values:[データ配列] }, {...
   d3iida.multiLineChart = function module() {
+    // 想定しているデータの形はこう→ [ {name:'データ名', values:[データ配列] }, {...
     // values配列のオブジェクトで使っているキー。call()前に指定し忘れた場合はこれが使われる
     var valuesKeyX = 'date';
     var valuesKeyY = 'temperature';
@@ -25,8 +25,8 @@
     var h = height - margin.top - margin.bottom;
 
     // スケール関数
-    var xScale; // 初期値は d3.scaleTime();
-    var yScale; // 初期値は d3.scaleLinear();
+    var xScale = d3.scaleTime(); // 初期値は d3.scaleTime();
+    var yScale = d3.scaleLinear(); // 初期値は d3.scaleLinear();
 
     // 軸のテキスト
     var xAxisText = '時刻';
@@ -65,13 +65,12 @@
         var color = d3.scaleOrdinal(d3.schemeCategory10);
 
         // X軸の入力ドメインを求めるために[最小値, 最大値]の配列を作成する
-        // X軸が時系列ならどのデータでも同じではないか、という前提で一つ目のデータだけで処理する
+        // X軸が時系列ならどのデータでも同じではないか、という前提で一つ目のデータ_data[0]だけで処理する
         var xextent = d3.extent(_data[0].values, function(d) {
           return d[valuesKeyX]; /* d.date */
         });
 
         // X軸方向のスケール関数と、ドメイン-レンジ指定
-        xScale = d3.scaleTime();
         xScale.domain(xextent).range([0, w]);
 
         // Y軸の入力ドメインを求めるために[最小値, 最大値]の配列を作成する
@@ -90,7 +89,6 @@
         ];
 
         // Y軸方向のスケール関数と、ドメイン-レンジ指定
-        yScale = d3.scaleLinear();
         yScale.domain(yextent).range([h, 0]).nice();
 
         // 受け取ったデータを紐付けたSVGを作ることで、複数回call()されたときにSVGの重複作成を防止する
@@ -441,44 +439,93 @@
      *   リアルタイム海洋情報収集解析システム
      *   http://buoy.nrifs.affrc.go.jp/top.php
      */
-    var dataText20150506 = function() {
-      /*EOF*
-      計測時刻  水深 1m  水深 5m
-      23:00  18.01  17.95
-      22:00  18.00  17.97
-      21:00  18.06  18.02
-      20:00  18.08  18.08
-      19:00  18.12  18.09
-      18:00  18.16  18.15
-      17:00  18.19  18.17
-      16:00  18.25  18.21
-      15:00  18.26  18.10
-      14:00  18.00  17.89
-      13:00  18.19  17.80
-      12:00  17.94  17.70
-      11:00  18.07  17.20
-      10:00  17.88  17.20
-      09:00  17.82  17.24
-      08:00  17.69  17.45
-      07:00  17.75  17.77
-      06:00  17.85  17.84
-      05:00  17.82  17.78
-      04:00  17.69  17.71
-      03:00  17.69  17.71
-      02:00  17.84  17.83
-      01:00  17.75  17.77
-      00:00  17.88  17.91
-      *EOF*/
-    }.toString().replace(/(\r)/g, '').split('*EOF*')[1];
-    // 改行コードがCRLFの場合は replace(/(\n)/g, '')
-    // console.log(dataText20150506);
+    var dataText20150506 = [
+      '計測時刻  水深 1m  水深 5m',
+      '23:00  18.01  17.95',
+      '22:00  18.00  17.97',
+      '21:00  18.06  18.02',
+      '20:00  18.08  18.08',
+      '19:00  18.12  18.09',
+      '18:00  18.16  18.15',
+      '17:00  18.19  18.17',
+      '16:00  18.25  18.21',
+      '15:00  18.26  18.10',
+      '14:00  18.00  17.89',
+      '13:00  18.19  17.80',
+      '12:00  17.94  17.70',
+      '11:00  18.07  17.20',
+      '10:00  17.88  17.20',
+      '09:00  17.82  17.24',
+      '08:00  17.69  17.45',
+      '07:00  17.75  17.77',
+      '06:00  17.85  17.84',
+      '05:00  17.82  17.78',
+      '04:00  17.69  17.71',
+      '03:00  17.69  17.71',
+      '02:00  17.84  17.83',
+      '01:00  17.75  17.77',
+      '00:00  17.88  17.91'
+    ];
 
-    // データマネージャをインスタンス化
-    var dataManager = d3iida.dataManager();
+    // 文字列の配列からからデータに変換する関数
+    function loadSeaTemperatureFromString(lines) {
+      /*
+        名前とデータ配列を格納したオブジェクトの配列にする
+        [ { name: depth1m, values: [] },
+          { name: depth5m, values: [] }, ... ]
 
-    // データマネージャにこのテキストを渡してd3.jsに適したデータに変換する
-    dataManager.loadSeaTemperatureFromString(dataText20150506);
-    var data = dataManager.getData();
+        values配列はグラフ化するために(x,y)のペアになるようにする
+        [ { date:..., temperature:... },
+          { date:..., temeprature:... }, ... ]
+      */
+
+      // 時刻の書式
+      var parseDate = d3.timeParse('%H:%M');
+
+      // ここで使うキーの一覧
+      var dataKeys = ['date', '水深1m', '水深5m'];
+
+      // 各行のオブジェクト配列
+      var lineDatas = [];
+
+      // 各行の中身を正規表現で分割してオブジェクト化する
+      // 元のデータは23時始まりで、行と共に時間が古くなっていくので逆順に処理する
+      var i;
+      for (i = lines.length - 1; i > 0; i--) {
+        var l = lines[i];
+        var matches = l.match(/(\d+:00)\s+(\d{1,2}\.\d{1,2})\s+(\d{1,2}\.\d{1,2})/);
+        if (!matches || matches.length !== 4) {
+          continue;
+        }
+
+        // dataKeysをキーにしたオブジェクト(連想配列)に収める
+        var v = {};
+        v[dataKeys[0]] = parseDate(matches[1]);
+        v[dataKeys[1]] = matches[2];
+        v[dataKeys[2]] = matches[3];
+
+        // それをlineDatas配列に追加していく
+        lineDatas.push(v);
+      }
+
+      // Array.map()は配列の各要素について関数を適用して新たな配列を返す。
+      // ['水深1m', '水深5m']の部分はdataKeys.slice()でもいいし、dataKeys.mapでdateを除外してもいい。
+      var data = ['水深1m', '水深5m'].map(function(k) {
+        return {
+          name: k,
+          values: lineDatas.map(function(d) { // dはlineDatasの行
+            return {
+              date: d['date'], // d.date
+              temperature: Number(d[k]) // d.'depth1m' or d.'depth5m'
+            };
+          })
+        };
+      });
+      return data;
+      //
+    }
+
+    var data = loadSeaTemperatureFromString(dataText20150506);
     // console.log(data);
 
     var chart = d3iida.multiLineChart();
@@ -487,7 +534,6 @@
       .valuesKeyY('temperature')
       .xAxisText('時刻')
       .yAxisText('水温')
-      // .xTickFormat(d3.timeFormat('%H:%M'))
       .numTicks(12)
       .showLineDot(true);
 
