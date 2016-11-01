@@ -1,11 +1,15 @@
 /* global d3, d3iida */
 
+// 2016.11.01
+// Takamitsu IIDA
+// takamitsu.iida@gmail.com
+
 // radioButtonモジュール
 (function() {
   d3iida.radioButton = function module() {
     // 領域のサイズ
     var width = 300;
-    var height = 50;
+    var height = 55;
 
     // 描画領域のマージン
     var margin = {top: 5, right: 10, bottom: 0, left: 10};
@@ -17,8 +21,8 @@
     // ボタンのサイズ、色、配置間隔
     var buttonSize = 8;
     var buttonColorOut = '#999';
-    var buttonColorOver = '#333';
-    var buttonColorSelected = '#333';
+    var buttonColorOver = '	#00008B';
+    var buttonColorSelected = '#00008B';
     var buttonIntervalWidth = 80;
 
     // タイトル
@@ -103,13 +107,17 @@
             }
           })
           .on('click', function(d, i) {
+            var currentIndex = selectedIndex;
             selectedIndex = d.index || i;
             var clicked = d3.select(this);
             chartG.selectAll('.d3iida-radio-chart-button').attr('fill', buttonColorOut);
-            d3.select(this).attr('fill', buttonColorSelected);
-            d3.select('#focus').transition().attr('cx', clicked.attr('cx'));
+            clicked.attr('fill', buttonColorSelected);
+            d3.select('.d3iida-radio-focus-circle').transition().attr('cx', clicked.attr('cx'));
             // カスタムイベントをディスパッチする
             dispatch.call('customClick', this, selectedIndex);
+            if (selectedIndex !== currentIndex) {
+              dispatch.call('selectedIndexChanged', this, selectedIndex);
+            }
           });
 
         // ラベル
@@ -131,12 +139,11 @@
           });
 
         // focus
-        var focusAll = focusG.selectAll('.d3iida-radio-focus-circle').data([0]);
+        var focusAll = focusG.selectAll('.d3iida-radio-focus-circle').data(['dummy']);
         // ENTER領域
         focusAll.enter()
           .append('circle')
           .attr('class', 'd3iida-radio-focus-circle')
-          .attr('id', 'focus')
           .attr('cx', titleOffset + selectedIndex * buttonIntervalWidth)
           .attr('cy', buttonSize * 2)
           .attr('r', buttonSize + 2)
@@ -152,6 +159,7 @@
         return width;
       }
       width = _;
+      w = width - margin.left - margin.right;
       return this;
     };
 
@@ -160,6 +168,7 @@
         return height;
       }
       height = _;
+      h = height - margin.top - margin.bottom;
       return this;
     };
 
@@ -227,4 +236,47 @@
     // 呼び出し元にはexportsを返却する。
     return exports;
   };
+
+  // 使い方
+  d3iida.radioButton.example = function() {
+    // <div id='radioButton'></div>
+    var radioButtonContainer = d3.select('#radioButton');
+
+    // ラジオボタンに表示するデータ
+    var controlDatas = [
+      // d3iida.radioButtonで必要なキーはlabelとindex
+      {
+        index: 0,
+        label: 'ビーフ'
+      },
+      {
+        index: 1,
+        label: 'フィッシュ'
+      },
+      {
+        index: 2,
+        label: 'チキン'
+      }
+    ];
+
+    var radioButton = d3iida.radioButton();
+
+    radioButton
+      .width(380)
+      .title('お食事')
+      .selectedIndex(0)
+      .on('selectedIndexChanged', function(selectedIndex) {
+        if (selectedIndex === 0) {
+          console.log('ビーフ');
+        } else if (selectedIndex === 1) {
+          console.log('フィッシュ');
+        } else if (selectedIndex === 2) {
+          console.log('チキン');
+        }
+      });
+
+    // コンテナにデータを紐付けてcall()する
+    radioButtonContainer.datum(controlDatas).call(radioButton);
+  };
+  //
 })();

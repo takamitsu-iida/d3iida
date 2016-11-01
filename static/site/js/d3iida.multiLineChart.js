@@ -1,5 +1,9 @@
 /* global d3, d3iida */
 
+// 2016.11.01
+// Takamitsu IIDA
+// takamitsu.iida@gmail.com
+
 // マルチライングラフモジュール
 (function() {
   d3iida.multiLineChart = function module() {

@@ -7,7 +7,7 @@
 // simpleTableモジュール
 (function() {
   d3iida.simpleTable = function module() {
-
+    //
     // コンテナに紐付けられているデータ配列が[rowObj1, rowObj2, rowObj3, ...]として、
     // 各オブジェクトのなかから表示したい情報を配列にして返す関数
     // デフォルト動作は、オブジェクトに格納されているvalueの列挙。

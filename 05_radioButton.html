@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <!-- IE9以降で正しく機能するようにする -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <title>d3iida.js</title>
+
+  <!-- d3.js v4をインクルード -->
+  <script src="./static/d3.4.2.8/d3.min.js"></script>
+
+  <!-- スタイルシート -->
+  <link rel="stylesheet" href="./static/site/css/d3iida.css" type="text/css">
+
+  <!-- d3iida.jsをインクルード -->
+  <script src="./static/site/js/d3iida.js"></script>
+  <script src="./static/site/js/d3iida.radioButton.js"></script>
+
+</head>
+
+<body>
+
+  <div>
+    <h1>radioButton</h1>
+    <p>
+      d3.jsで作られたラジオボタンです。
+    </p>
+    <div class="chartContainer">
+      <div id="radioButton"></div>
+    </div>
+  </div>
+
+  <script>
+    d3iida.radioButton.example();
+  </script>
+
+</body>
+
+</html>

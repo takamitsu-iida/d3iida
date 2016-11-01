@@ -152,8 +152,7 @@
     brushControl
       .title('マウス動作')
       .selectedIndex(0)
-      .on('customClick', function(d) {
-        var selectedIndex = d;
+      .on('selectedIndexChanged', function(selectedIndex) {
         if (selectedIndex === 0) {
           if (isBrushEnabled) {
             toggleBrush();

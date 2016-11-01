@@ -1,5 +1,9 @@
 /* global d3, d3iida */
 
+// 2016.11.01
+// Takamitsu IIDA
+// takamitsu.iida@gmail.com
+
 // 棒グラフモジュール
 (function() {
   d3iida.barChart = function module() {
