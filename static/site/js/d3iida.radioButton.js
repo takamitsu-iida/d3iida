@@ -7,8 +7,10 @@
 // radioButtonモジュール
 (function() {
   d3iida.radioButton = function module() {
-    // 領域のサイズ
+    // 幅は経験則的に決める必要がある
     var width = 300;
+
+    // 1行で収まるなら固定
     var height = 55;
 
     // 描画領域のマージン
@@ -21,8 +23,8 @@
     // ボタンのサイズ、色、配置間隔
     var buttonSize = 8;
     var buttonColorOut = '#999';
-    var buttonColorOver = '	#00008B';
-    var buttonColorSelected = '#00008B';
+    var buttonColorOver = '#0000FF'; // blue
+    var buttonColorSelected = '#0000FF'; // blue
     var buttonIntervalWidth = 80;
 
     // タイトル
@@ -47,14 +49,16 @@
         // ENTER領域
         var mainG = svgAll.enter()
           .append('svg')
-          .attr('width', width).attr('height', height)
+          .attr('width', width)
+          .attr('height', height)
           .append('g')
           .classed('d3iida-radio-main', true)
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
         // 枠の表示
         mainG.append('rect')
-          .attr('width', w).attr('height', h)
+          .attr('width', w)
+          .attr('height', h)
           .style('fill', 'none')
           .style('stroke', '#CCC')
           .style('stroke-width', 1);
@@ -177,6 +181,7 @@
         return margin.left;
       }
       margin.left = _;
+      w = width - margin.left - margin.right;
       return this;
     };
 
@@ -185,6 +190,7 @@
         return margin.right;
       }
       margin.right = _;
+      w = width - margin.left - margin.right;
       return this;
     };
 
@@ -242,6 +248,9 @@
     // <div id='radioButton'></div>
     var radioButtonContainer = d3.select('#radioButton');
 
+    // <div id='selected'></div>
+    var selectedContainer = d3.select('#selected');
+
     // ラジオボタンに表示するデータ
     var controlDatas = [
       // d3iida.radioButtonで必要なキーはlabelとindex
@@ -259,19 +268,17 @@
       }
     ];
 
-    var radioButton = d3iida.radioButton();
-
-    radioButton
+    var radioButton = d3iida.radioButton()
       .width(380)
       .title('お食事')
       .selectedIndex(0)
       .on('selectedIndexChanged', function(selectedIndex) {
         if (selectedIndex === 0) {
-          console.log('ビーフ');
+          selectedContainer.text('ビーフ');
         } else if (selectedIndex === 1) {
-          console.log('フィッシュ');
+          selectedContainer.text('フィッシュ');
         } else if (selectedIndex === 2) {
-          console.log('チキン');
+          selectedContainer.text('チキン');
         }
       });
 
