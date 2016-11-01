@@ -7,6 +7,9 @@
     // ユーティリティ関数を作る場合には、d3iida.utils配下にぶら下げる
     var utils = {};
 
+    // アプリのデータを取り込む場合、appdata配下にぶら下げる
+    var appdata;
+
     // ヒアドキュメント経由で静的データを取り込む場合、テキストデータをheredoc配下にぶら下げる
     var heredoc = {};
 
@@ -16,6 +19,7 @@
     // 公開するオブジェクト
     return {
       utils: utils,
+      appdata: appdata,
       heredoc: heredoc,
       geodata: geodata
     };
