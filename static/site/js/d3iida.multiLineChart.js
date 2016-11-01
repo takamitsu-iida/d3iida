@@ -13,8 +13,8 @@
     var valuesKeyY = 'temperature';
 
     // SVGの枠の大きさ
-    var width = 800;
-    var height = 500;
+    var width = 720;
+    var height = 480;
 
     // 'g'の描画領域となるデフォルトのマージン
     var margin = {

@@ -189,7 +189,7 @@
     var data = d3.range(n).map(random);
     // console.log(data);
 
-    var pieChart = d3iida.pieChart().width(600).height(600);
+    var pieChart = d3iida.pieChart().width(500).height(500);
 
     // カスタムイベントにハンドラを登録する
     pieChart.on('customHover', function(d) {

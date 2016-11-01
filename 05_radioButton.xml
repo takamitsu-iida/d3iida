@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- 【参考URL】https://github.com/prog-mitsu/runJsInGoogleSite -->
+
+<!-- https://sites.google.com/site/d3iidademo/static/site/05_radioButton.xml -->
+<!-- サイズは横800ピクセル, 高さ600, webページとして作成し、ページ設定で添付ファイルの許可を外す(全部のチェックを外す) -->
+
+<Module>
+
+  <!-- ガジェット名 -->
+  <ModulePrefs title="d3iida" />
+
+  <Content type="html">
+    <![CDATA[
+
+      <!-- JSファイル -->
+      <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/d3-4-2-8/d3.min.js'></script>
+      <!-- <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/topojson-1-6-27/topojson.min.js'></script> -->
+      <!-- <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/crossfilter-1-3-12/crossfilter.min.js'></script> -->
+
+      <!-- スタイルシート -->
+      <link rel="stylesheet" type="text/css" href='//sites.google.com/site/d3iidademo/static/site/css/d3iida.css'/>
+      <!-- <link rel="stylesheet" type="text/css" href='//sites.google.com/site/d3iidademo/static/site/css/d3iida.japan.css'/> -->
+
+      <!-- d3iida.jsをインクルード -->
+      <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/site/js/d3iida.js'></script>
+      <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/site/js/d3iida.radioButton.js'></script>
+
+      <div>
+        <h1>radioButton</h1>
+        <p>
+          d3.jsで作られた簡易ラジオボタンです。幅(width)は自動計算されないため、経験則的に決めないといけません。
+        </p>
+        <div class="chartContainer">
+          <div id="radioButton"></div>
+          <div id="selected"></div>
+        </div>
+      </div>
+
+      <script>
+        d3iida.radioButton.example();
+      </script>
+
+    ]]>
+  </Content>
+</Module>
