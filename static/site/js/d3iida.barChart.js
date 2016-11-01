@@ -136,9 +136,12 @@
     var data = [10, 20, 30, 40, 50];
     // var data = d3iida.utils.rndNumbers(50, 100);
 
+    var width = 600;
+    var height = 400;
+
     var barChart = d3iida.barChart()
-      .width(500)
-      .height(300)
+      .width(width)
+      .height(height)
       .on('customHover', function(d) {
         d3.select('#barChartMessage').text(d);
       });
@@ -171,11 +174,11 @@
 
       // テスト用。チャートのパラメータ変更（幅）
       var updateWidth = function() {
-        // widthとしてランダム値を使う
-        var rnd = d3iida.utils.rndNum(100, 500);
+        width = 500;
+        height = 300;
 
         // チャート側のパラメータを変更して、再度セレクションでcall()
-        container.call(barChart.width(rnd));
+        container.call(barChart.width(width).height(height));
       };
 
       dataTimer = setInterval(updateData, 1000);
