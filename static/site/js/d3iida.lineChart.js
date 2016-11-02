@@ -41,9 +41,6 @@
       })
       .curve(d3.curveBasisOpen);
 
-    // パス
-    var path;
-
     // X軸に付与するグリッドライン（Y軸と平行のグリッド線）
     var drawXGrid = false;
     function make_x_gridlines() {
@@ -56,13 +53,14 @@
       return d3.axisLeft(yScale); // .ticks(5);
     }
 
+    // 描画領域の大きさに変更はあるか
+    var sizeChanged = false;
+
     // call()されたときに呼ばれる公開関数
     function exports(_selection) {
       _selection.each(function(_data) {
         if (!_data) {
-          // データにnullを指定してcall()した場合は、既存のSVGとpathを削除する
-          // 描画領域の大きさを変更したら、全部書き直したほうが簡単
-          path = null;
+          // データにnullを指定してcall()した場合は、既存のSVGを削除する
           d3.select(this).select('svg').remove();
           return;
         }
@@ -70,24 +68,48 @@
         // ダミーデータを紐付けることでsvgの重複作成を防止する
         var svgAll = d3.select(this).selectAll('svg').data(['dummy']);
 
-        // 初回call()時のみsvgを作成し、チャート描画領域'g'を追加、マージン分だけずらす
-        var lineChartG = svgAll
+        svgAll
           // ENTER領域
           .enter()
           .append('svg')
-          .attr('width', width)
-          .attr('height', height)
           .attr('debug', function() {
             console.log('new svg created');
           })
+          // ENTER + UPDATE領域に対して設定すれば楽だけど、毎回変更するのは重たい
+          // .merge(svgAll)
+          .attr('width', width)
+          .attr('height', height);
+
+        // 実際に描画領域の大きさに変更がある場合だけUPDATE領域を変更する
+        if (sizeChanged) {
+          svgAll
+            .attr('width', width)
+            .attr('height', height);
+        }
+
+        // チャート描画領域'g'を追加
+        var lineChartAll = d3.select(this).select('svg').selectAll('.lineChart').data(['dummy']);
+        lineChartAll
+          // ENTER領域
+          .enter()
           .append('g')
+          .classed('lineChart', true)
+          // .merge(lineChartAll)
           .attr('width', w)
           .attr('height', h)
-          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-          .classed('lineChartG', true);
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-        // id='clip'でクリップパスを定義して、領域外に描画されないようにする
-        lineChartG
+        if (sizeChanged) {
+          lineChartAll
+            .attr('width', w)
+            .attr('height', h)
+            .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+        }
+
+        lineChartAll
+          // ENTER領域
+          .enter()
+          // id='clip'でクリップパスを定義して、領域外に描画されないようにする
           .append('defs')
           .append('clipPath')
           .attr('id', 'clip')
@@ -95,59 +117,99 @@
           .attr('width', w)
           .attr('height', h);
 
+        // 作成済みの描画領域'g'を選択しておく
+        var lineChart = d3.select(this).select('.lineChart');
+
         // x軸を追加する。クラス名はCSSと合わせる
-        lineChartG
+        var xAxisAll = lineChart.selectAll('.x-axis').data(['dummy']);
+        xAxisAll
+          // ENTER領域
+          .enter()
           .append('g')
-          .attr('class', 'x axis xaxis')
+          .classed('x-axis', true)
+          // .merge(xAxisAll)
           .attr('transform', 'translate(0,' + h / 2 + ')')
           .call(d3.axisBottom(xScale).ticks(''));
 
+        if (sizeChanged) {
+          xAxisAll
+            .attr('transform', 'translate(0,' + h / 2 + ')')
+            .call(d3.axisBottom(xScale).ticks(''));
+        }
+
         // y軸を追加する。クラス名はCSSと合わせる
-        lineChartG
+        var yAxisAll = lineChart.selectAll('.y-axis').data(['dummy']);
+        yAxisAll
+          // ENTER領域
+          .enter()
           .append('g')
-          .attr('class', 'y axis yaxis')
+          .classed('y-axis', true)
+          // .merge(yAxisAll)
           .call(d3.axisLeft(yScale));
+
+        if (sizeChanged) {
+          yAxisAll.call(d3.axisLeft(yScale));
+        }
 
         // X軸に対してグリッド線を引く(Y軸と平行の線)
         if (drawXGrid) {
-          lineChartG
+          var xGridAll = lineChart.selectAll('.x-grid').data(['dummy']);
+          xGridAll
+            // ENTER領域
+            .enter()
             .append('g')
-            .attr('class', 'grid xgrid')
+            .classed('x-grid', true)
+            // .merge(xGridAll)
             .call(make_x_gridlines().tickSize(-h).tickFormat(''));
+
+          if (sizeChanged) {
+            xGridAll.call(make_x_gridlines().tickSize(-h).tickFormat(''));
+          }
         }
 
         // Y軸に対してグリッド線を引く(X軸と平行の線)
         if (drawYGrid) {
-          lineChartG
+          var yGridAll = lineChart.selectAll('.y-grid').data(['dummy']);
+          yGridAll
+            // ENTER領域
+            .enter()
             .append('g')
-            .attr('class', 'grid')
+            .classed('y-grid', true)
+            // .merge(yGridAll)
             .call(make_y_gridlines().tickSize(-w).tickFormat(''));
+
+          if (sizeChanged) {
+            yGridAll
+              .call(make_y_gridlines().tickSize(-w).tickFormat(''));
+          }
         }
 
-        if (path) {
-          // 既にパスを描画済みなら、パスのアトリビュートを更新して、左にズラす
-          var t = d3.transition().duration(750).ease(d3.easeLinear);
-          path.attr('d', line).attr('transform', null).transition(t).attr('transform', 'translate(' + xScale(-1) + ')');
-        } else {
-          // 新規描画
-          // line関数を渡してパスを作成する
-          path = lineChartG
-            .append('g')
-            .attr('clip-path', 'url(#clip)')
-            .append('path')
-            .datum(_data)
-            .attr('d', line)
-            .style('fill', 'none')
-            .style('stroke', 'steelblue')
-            .style('stroke-width', '1.5px')
-            .classed('line', true); // スタイルはCSSで変えた方がよい
+        // トランジションのパラメータ
+        var t = d3.transition().duration(750).ease(d3.easeLinear);
 
-          path.on('mouseover', function() {
-            // カスタムイベントをディスパッチする
-            // dispatch.call('customHover', this, _data);
-            dispatch.call('customHover', this, 'customHover');
-          });
-        }
+        // 既存のpathを左にズラす
+        d3.select(this).select('.line')
+          .attr('d', line)
+          .attr('transform', null)
+          .transition(t)
+          .attr('transform', 'translate(' + xScale(-1) + ')');
+
+        // 初回call()時のみpathを追加
+        lineChart.selectAll('.pathG').data(['dummy'])
+          // ENTER領域
+          .enter()
+          .append('g')
+          .attr('clip-path', 'url(#clip)')
+          .classed('pathG', true)
+          .append('path')
+          .datum(_data)
+          .attr('d', line)
+          .style('fill', 'none')
+          .style('stroke', 'steelblue')
+          .style('stroke-width', '1.5px')
+          .classed('line', true); // スタイルはCSSで変えた方がよい
+
+        sizeChanged = false;
         //
       });
     }
@@ -159,6 +221,7 @@
       width = _;
       w = width - margin.left - margin.right;
       xScale.range([0, w]);
+      sizeChanged = true;
       return this;
     };
 
@@ -169,6 +232,7 @@
       height = _;
       h = height - margin.top - margin.bottom;
       yScale.range([h, 0]);
+      sizeChanged = true;
       return this;
     };
 
@@ -212,7 +276,6 @@
     var updateData = function() {
       repeatCount++;
       if (repeatCount === 5) {
-        container.datum(null).call(lineChart);
         lineChart.width(400).height(300);
         container.datum(data).call(lineChart);
       }
