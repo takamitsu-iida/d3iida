@@ -17,26 +17,47 @@
 
     function exports(_selection) {
       _selection.each(function(_data) {
-        // callのたびに<table>を作りなおす
-        d3.select(this).select('table').remove();
+        if (!_data) {
+          d3.select(this).select('table').remove();
+          return;
+        }
 
-        var table = d3.select(this).append('table');
-        var tbody = table.append('tbody');
-
-        // 行を作成
-        tbody.selectAll('tr')
-          .data(_data)
+        // ダミーデータを紐付けて初回call()時のみ<table>を作成する
+        d3.select(this).selectAll('table').data(['dummy'])
           .enter()
-          .append('tr') // trタグ追加
+          .append('table');
+
+        var trAll = d3.select(this).select('table').selectAll('tr').data(_data);
+
+        trAll
+          // ENTER領域
+          .enter()
+          .append('tr')
           .selectAll('td')
           .data(function(row) {
             return rowFilter(row);
           })
           .enter()
-          .append('td') // tdタグ追加
+          .append('td')
           .text(function(d) {
-            return d; // d.value;
+            return d;
           });
+
+        trAll
+          // EXIT領域
+          .exit()
+          .remove();
+
+        trAll
+          // UPDATE領域
+          .selectAll('td')
+          .data(function(row) {
+            return rowFilter(row);
+          })
+          .text(function(d) {
+            return d;
+          });
+        //
       });
     }
 
