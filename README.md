@@ -62,22 +62,23 @@ d3.select('#hello').datum(dataset).call(hello);
 
 ## 05_radioButton.html
 
-ラジオボタンをモジュール化したものです。
+ラジオボタンをモジュール化したものです。20_mapChart.htmlで使っているものです。
 
 [ライブデモ](https://sites.google.com/site/d3iidademo/05_radiobutton)
 
 
 ## 11_multiLineChart.html
 
-応用編です。この程度のグラフを書くのにこんなにも大量のコードを書かないとすると、ちょっと考えてしまいます。
+応用編です。
+この程度のグラフを書くのにこんなにも大量のコードを書かないけないとすると、ちょっと考えてしまいます。
 
 [ライブデモ](https://sites.google.com/site/d3iidademo/11_multilinechart)
 
 
-## 20_map.html
+## 20_mapChart.html
 
 日本地図の上に県庁所在地をプロットしたものです。
-ズーム処理とブラシ処理でかなり悩みました。
+ズーム処理とブラシ処理の両立でかなり悩みました。
 ラジオボタンとテーブル表示もd3.jsで実装しています。
 
 [ライブデモ](https://sites.google.com/site/d3iidademo/20_mapchart)
