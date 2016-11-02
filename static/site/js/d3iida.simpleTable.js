@@ -17,7 +17,7 @@
 
     function exports(_selection) {
       _selection.each(function(_data) {
-        // <table>を作りなおす
+        // callのたびに<table>を作りなおす
         d3.select(this).select('table').remove();
 
         var table = d3.select(this).append('table');

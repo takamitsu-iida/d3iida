@@ -38,16 +38,22 @@
     var selectedIndex = 0;
 
     // 外部にイベントを公開できるようにするためにd3.dispatchを使う。
-    var dispatch = d3.dispatch('customClick', 'selectedIndexChanged');
+    var dispatch = d3.dispatch('selectedIndexChanged');
 
     // d3でデータを紐付けしたあとcall()することでこれが呼ばれる
     function exports(_selection) {
       _selection.each(function(_data) {
-        // 受け取ったデータを紐付けたSVGを作ることで、SVGの重複作成を防ぐ
-        var svgAll = d3.select(this).selectAll('svg').data([_data]);
+        if (!_data) {
+          // nullをバインドしてcall()されたら、描画済みのsvgを全て削除する
+          d3.select(this).select('svg').remove();
+          return;
+        }
+
+        // ダミーデータを紐付けることで重複作成を防止する
+        var svgAll = d3.select(this).selectAll('svg').data(['dummy']);
 
         // ENTER領域
-        var mainG = svgAll.enter()
+        var mainLayer = svgAll.enter()
           .append('svg')
           .attr('width', width)
           .attr('height', height)
@@ -56,7 +62,7 @@
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
         // 枠の表示
-        mainG.append('rect')
+        mainLayer.append('rect')
           .attr('width', w)
           .attr('height', h)
           .style('fill', 'none')
@@ -64,23 +70,18 @@
           .style('stroke-width', 1);
 
         // タイトル表示
-        mainG.append('text')
+        mainLayer.append('text')
           .attr('x', 10)
           .attr('y', buttonSize * 3)
           .attr('fill', buttonColorOut)
           .attr('font-size', fontSize)
           .text(title);
 
-        var chartG = mainG.append('g').classed('d3iida-radio-chart', true);
-        var focusG = mainG.append('g').classed('d3iida-radio-focus', true);
-        var labelG = mainG.append('g').classed('d3iida-radio-label', true);
-
         // ラジオボタンをchartGに追加
-        var buttonAll = chartG.selectAll('.d3iida-radio-chart-button').data(_data);
-        // ENTER領域
-        var buttons = buttonAll.enter()
+        var buttons = mainLayer.selectAll('.d3iida-radio-button').data(_data).enter()
+          // ENTER領域
           .append('circle')
-          .classed('d3iida-radio-chart-button', true)
+          .classed('d3iida-radio-button', true)
           .attr('id', function(d) {
             return d.index || d.value;
           })
@@ -114,20 +115,18 @@
             var currentIndex = selectedIndex;
             selectedIndex = d.index || i;
             var clicked = d3.select(this);
-            chartG.selectAll('.d3iida-radio-chart-button').attr('fill', buttonColorOut);
+            mainLayer.selectAll('.d3iida-radio-button').attr('fill', buttonColorOut);
             clicked.attr('fill', buttonColorSelected);
             d3.select('.d3iida-radio-focus-circle').transition().attr('cx', clicked.attr('cx'));
             // カスタムイベントをディスパッチする
-            dispatch.call('customClick', this, selectedIndex);
             if (selectedIndex !== currentIndex) {
               dispatch.call('selectedIndexChanged', this, selectedIndex);
             }
           });
 
         // ラベル
-        var labelAll = labelG.selectAll('.d3iida-radio-label-text').data(_data);
-        // ENTER領域
-        labelAll.enter()
+        mainLayer.selectAll('.d3iida-radio-label-text').data(_data).enter()
+          // ENTER領域
           .append('text')
           .attr('class', 'd3iida-radio-label-text')
           .attr('x', function(d, i) {
@@ -143,9 +142,8 @@
           });
 
         // focus
-        var focusAll = focusG.selectAll('.d3iida-radio-focus-circle').data(['dummy']);
-        // ENTER領域
-        focusAll.enter()
+        mainLayer.selectAll('.d3iida-radio-focus-circle').data(['dummy']).enter()
+          // ENTER領域
           .append('circle')
           .attr('class', 'd3iida-radio-focus-circle')
           .attr('cx', titleOffset + selectedIndex * buttonIntervalWidth)
@@ -281,6 +279,12 @@
           selectedContainer.text('チキン');
         }
       });
+
+    // コンテナにデータを紐付けてcall()する
+    radioButtonContainer.datum(controlDatas).call(radioButton);
+
+    // 削除テスト。わざとnullを紐付けてcall()すると削除される
+    radioButtonContainer.datum(null).call(radioButton);
 
     // コンテナにデータを紐付けてcall()する
     radioButtonContainer.datum(controlDatas).call(radioButton);

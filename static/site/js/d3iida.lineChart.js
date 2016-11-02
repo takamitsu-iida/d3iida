@@ -60,50 +60,69 @@
     function exports(_selection) {
       _selection.each(function(_data) {
         if (!_data) {
-          // container.datum(null).call(lineChart);
-          // のように、データにnullを指定してcall()した場合は、既存のSVGとpathを削除する
+          // データにnullを指定してcall()した場合は、既存のSVGとpathを削除する
+          // 描画領域の大きさを変更したら、全部書き直したほうが簡単
           path = null;
-          d3.select(this).selectAll('svg').remove();
+          d3.select(this).select('svg').remove();
           return;
         }
 
-        // 受け取ったデータを紐付けたSVGを作ることで、複数回call()されたときにSVGの重複作成を防止する
-        var svgAll = d3.select(this).selectAll('svg').data([_data]);
+        // ダミーデータを紐付けることでsvgの重複作成を防止する
+        var svgAll = d3.select(this).selectAll('svg').data(['dummy']);
 
-        // ENTER領域
-        // 初回call()時のみ
-        // svgを新規作成し、チャート描画領域'g'を追加、マージン分だけずらす
-        var enterG = svgAll.enter()
+        // 初回call()時のみsvgを作成し、チャート描画領域'g'を追加、マージン分だけずらす
+        var lineChartG = svgAll
+          // ENTER領域
+          .enter()
           .append('svg')
-          .attr('width', width).attr('height', height)
+          .attr('width', width)
+          .attr('height', height)
           .attr('debug', function() {
             console.log('new svg created');
           })
           .append('g')
-          .classed('lineChartG', true)
-          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+          .attr('width', w)
+          .attr('height', h)
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+          .classed('lineChartG', true);
 
         // id='clip'でクリップパスを定義して、領域外に描画されないようにする
-        enterG.append('defs').append('clipPath').attr('id', 'clip').append('rect').attr('width', w).attr('height', h);
+        lineChartG
+          .append('defs')
+          .append('clipPath')
+          .attr('id', 'clip')
+          .append('rect')
+          .attr('width', w)
+          .attr('height', h);
 
         // x軸を追加する。クラス名はCSSと合わせる
-        enterG.append('g').attr('class', 'x axis xaxis').attr('transform', 'translate(0,' + h / 2 + ')').call(d3.axisBottom(xScale).ticks(''));
+        lineChartG
+          .append('g')
+          .attr('class', 'x axis xaxis')
+          .attr('transform', 'translate(0,' + h / 2 + ')')
+          .call(d3.axisBottom(xScale).ticks(''));
 
         // y軸を追加する。クラス名はCSSと合わせる
-        enterG.append('g').attr('class', 'y axis yaxis').call(d3.axisLeft(yScale));
+        lineChartG
+          .append('g')
+          .attr('class', 'y axis yaxis')
+          .call(d3.axisLeft(yScale));
 
         // X軸に対してグリッド線を引く(Y軸と平行の線)
         if (drawXGrid) {
-          enterG.append('g').attr('class', 'grid xgrid').call(make_x_gridlines().tickSize(-h).tickFormat(''));
+          lineChartG
+            .append('g')
+            .attr('class', 'grid xgrid')
+            .call(make_x_gridlines().tickSize(-h).tickFormat(''));
         }
 
         // Y軸に対してグリッド線を引く(X軸と平行の線)
         if (drawYGrid) {
-          enterG.append('g').attr('class', 'grid').call(make_y_gridlines().tickSize(-w).tickFormat(''));
+          lineChartG
+            .append('g')
+            .attr('class', 'grid')
+            .call(make_y_gridlines().tickSize(-w).tickFormat(''));
         }
-
-        // チャート描画領域であるsvg直下の'g'をセレクト
-        var g = d3.select(this).select('.lineChartG');
 
         if (path) {
           // 既にパスを描画済みなら、パスのアトリビュートを更新して、左にズラす
@@ -112,11 +131,16 @@
         } else {
           // 新規描画
           // line関数を渡してパスを作成する
-          path = g.append('g').attr('clip-path', 'url(#clip)')
+          path = lineChartG
+            .append('g')
+            .attr('clip-path', 'url(#clip)')
             .append('path')
             .datum(_data)
-            .attr('class', 'line')
-            .attr('d', line);
+            .attr('d', line)
+            .style('fill', 'none')
+            .style('stroke', 'steelblue')
+            .style('stroke-width', '1.5px')
+            .classed('line', true); // スタイルはCSSで変えた方がよい
 
           path.on('mouseover', function() {
             // カスタムイベントをディスパッチする

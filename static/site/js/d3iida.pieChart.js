@@ -53,9 +53,7 @@
     function exports(_selection) {
       _selection.each(function(_data) {
         if (!_data) {
-          // container.datum(null).call(pieChart);
-          // のように、データにnullを指定してcall()した場合は、既存のSVGを削除する
-          d3.select(this).selectAll('svg').remove();
+          d3.select(this).select('svg').remove();
           return;
         }
 
@@ -63,19 +61,22 @@
         var data = pie(_data);
         // console.log(data);
 
-        // 受け取ったデータを紐付けたSVGを作ることで、複数回call()されたときにSVGの重複作成を防止する
-        var svgAll = d3.select(this).selectAll('svg').data([_data]);
+        // ダミーデータを紐付けることでsvgの重複作成を防止する
+        var svgAll = d3.select(this).selectAll('svg').data(['dummy']);
 
         // ENTER領域
         // 既存のsvgがないならENTER領域にsvgを新規作成
         // チャート描画領域'g'を追加し、マージン分だけずらす
         svgAll.enter()
-          .append('svg').attr('width', width).attr('height', height)
+          .append('svg')
+          .attr('width', width)
+          .attr('height', height)
           .attr('debug', function() {
             console.log('new svg created');
           })
-          .append('g').classed('pieChartG', true)
-          .attr('transform', 'translate(' + (margin.left + w / 2) + ',' + (margin.top + h / 2) + ')');
+          .append('g')
+          .attr('transform', 'translate(' + (margin.left + w / 2) + ',' + (margin.top + h / 2) + ')')
+          .classed('pieChartG', true);
 
         // ここまではENTER領域の処理なので、初回call()時のみ実行される
         // 以下はcall()のたびに実行される

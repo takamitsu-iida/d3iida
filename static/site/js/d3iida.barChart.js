@@ -28,34 +28,47 @@
 
     function exports(_selection) {
       _selection.each(function(_data) {
+        // nullをバインドしてcall()されたら、描画済みのsvgを全て削除する
+        if (!_data) {
+          d3.select(this).select('svg').remove();
+          return;
+        }
+
         var barW = w / _data.length;
         var scaling = h / d3.max(_data);
 
-        // 受け取ったデータを紐付けたSVGを作ることで、複数回call()されたときにSVGの重複作成を防止する
-        var svgAll = d3.select(this).selectAll('svg').data([_data]);
+        // ダミーデータを紐付けることでsvgの重複作成を防止する
+        var svgAll = d3.select(this).selectAll('svg').data(['dummy']);
 
-        // ENTER領域
-        // 既存のsvgがないならenter()領域に新規作成し、描画領域となる'g'を追加
-        var enterG = svgAll.enter().append('svg').attr('width', width).attr('height', height).append('g').classed('barChartG', true);
+        svgAll
+          // UPDATE領域
+          .attr('width', width)
+          .attr('height', height)
+          .select('g')
+          .attr('width', w)
+          .attr('height', h)
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-        // 'g'はマージン分だけ描画領域をずらす
-        enterG.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-        // svgをセレクト
-        var svg = d3.select(this).select('svg');
-
-        // svgの大きさを合わせる
-        // 大きさを変更した場合は再度call()
-        svg.attr('width', width).attr('height', height);
+        svgAll
+          // ENTER領域
+          .enter()
+          .append('svg')
+          .attr('width', width)
+          .attr('height', height)
+          .append('g')
+          .attr('width', w)
+          .attr('height', h)
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+          .classed('mainLayer', true);
 
         // svg直下の'g'を取り出す
-        var g = svg.select('.barChartG');
+        var mainLayer = d3.select(this).select('.mainLayer');
 
         // transitionインスタンス
         var t = d3.transition().ease(d3.easeLinear);
 
-        // 棒グラフを'g'内に作成
-        var bars = g.selectAll('.bar')
+        // 棒グラフを作成
+        var bars = mainLayer.selectAll('.bar')
           .data(
             // dは_dataと同じなので、.data(_data)としてもいい
             function(d, i) {
