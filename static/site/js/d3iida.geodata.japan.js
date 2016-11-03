@@ -1,4 +1,3 @@
-/* global d3iida */
 /* eslint-disable */
 
 (function() {
