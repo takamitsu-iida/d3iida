@@ -18,13 +18,9 @@
       <!-- <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/topojson-1-6-27/topojson.min.js'></script> -->
       <!-- <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/crossfilter-1-3-12/crossfilter.min.js'></script> -->
 
-      <!-- スタイルシート -->
-      <link rel="stylesheet" type="text/css" href='//sites.google.com/site/d3iidademo/static/site/css/d3iida.css'/>
-      <!-- <link rel="stylesheet" type="text/css" href='//sites.google.com/site/d3iidademo/static/site/css/d3iida.japan.css'/> -->
-
-      <!-- d3iida.jsをインクルード -->
-      <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/site/js/d3iida.js'></script>
-      <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/site/js/d3iida.barChart.js'></script>
+      <!-- d3iida -->
+      <link rel="stylesheet" type="text/css" href='//sites.google.com/site/d3iidademo/static/site/dist/d3iida.css'/>
+      <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/site/dist/d3iida-min.js'></script>
 
       <h1>BarChart</h1>
       <p>

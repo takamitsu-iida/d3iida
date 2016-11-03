@@ -1,7 +1,3 @@
-@charset "UTF-8";
-
-/* CSSファイルの先頭はこれ(↑)でなければいけない */
-
 /*
  * d3iida.japan.css
  */
@@ -45,14 +41,14 @@
   stroke-width    : 1.0px;
   stroke-linejoin : round;
   stroke-linecap  : round;
-  cursor          : pointer; /* クリック可能にするならcursorを指定する */
+  cursor          : pointer; /* change cursor to enable click */
   pointer-events  : all;
 }
   .prefecture.active {
-    fill          : #dcc; /* 選択した県の色を変える */
+    fill          : #dcc;
   }
   .prefecture:hover {
-    fill          : #dcd; /* 色を変えた方が見やすい？ */
+    fill          : #dcd;
   }
 
 .Hokkaido {

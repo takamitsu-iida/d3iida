@@ -10,6 +10,7 @@
   d3iida.tooltip = function module(_accessor) {
     //
     var tooltipDivClass = 'd3iida-tooltip';
+    var selectString;
 
     function exports(_selection) {
       // ツールチップ用の<div>
@@ -28,8 +29,10 @@
         // call()元のノードのマウスの位置
         var mousePosition = d3.mouse(selectedNode);
 
+        var s = selectString || 'body';
+
         // ツールチップを新たに追加
-        tooltipDiv = d3.select('body')
+        tooltipDiv = d3.select(s)
           .append('div')
           .classed(tooltipDivClass, true)
           .style('left', (mousePosition[0] + 15) + 'px')
@@ -72,6 +75,14 @@
         return tooltipDivClass;
       }
       tooltipDivClass = _;
+      return this;
+    };
+
+    exports.selectString = function(_) {
+      if (!arguments.length) {
+        return selectString;
+      }
+      selectString = _;
       return this;
     };
 

@@ -231,11 +231,12 @@
           .on('mouseover', function(d) {
             console.log(d.properties.city);
           })
-          .call(d3iida.tooltip(
-            function(d, i) {
+          .call(
+            d3iida.tooltip(function(d, i) {
               return '<b>' + d.properties.city + '</b>';
-            }
-          ));
+            })
+            .selectString('#mapChart')
+          );
 
         // コンテナにブラシ制御用の新しいDIVを作り、そこにブラシ制御用のSVGを追加する
         d3.select(this).selectAll('#brushControl').data(['dummy']).enter()

@@ -1,8 +1,12 @@
 module.exports = function (grunt) {
   var pkg = grunt.file.readJSON('package.json');
+
+  grunt.file.defaultEncoding = 'utf-8';
+  grunt.file.preserveBOM = true;
+
   grunt.initConfig({
     concat: {
-      files: {
+      target_js: {
         // 元ファイルの指定
         src: [
           'static/site/js/d3iida.startup.js',
@@ -13,20 +17,25 @@ module.exports = function (grunt) {
           'static/site/js/d3iida.pieChart.js',
           'static/site/js/d3iida.radioButton.js',
           'static/site/js/d3iida.simpleTable.js',
+          'static/site/js/d3iida.tooltip.js',
           'static/site/js/d3iida.mapChart.js',
           'static/site/js/d3iida.geodata.japan.js',
           'static/site/js/d3iida.geodata.prefectures.js'
           ],
         // 出力ファイルの指定
-        dest: 'static/site/js/dist/d3iida.js'
+        dest: 'static/site/dist/d3iida.js'
+      },
+      target_css: {
+        src: ['static/site/css/d3iida.css', 'static/site/css/d3iida.japan.css'],
+        dest: 'static/site/dist/d3iida.css'
       }
     },
 
     uglify: {
-      dist: {
+      target_js: {
         files: {
           // 出力ファイル: 元ファイル
-          'static/site/js/dist/d3iida-min.js': 'static/site/js/dist/d3iida.js'
+          'static/site/dist/d3iida-min.js': ['static/site/dist/d3iida.js']
         }
       }
     }
