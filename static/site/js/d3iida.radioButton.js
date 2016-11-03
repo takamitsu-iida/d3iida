@@ -125,8 +125,9 @@
           });
 
         // ラベル
-        mainLayer.selectAll('.d3iida-radio-label-text').data(_data).enter()
+        mainLayer.selectAll('.d3iida-radio-label-text').data(_data)
           // ENTER領域
+          .enter()
           .append('text')
           .attr('class', 'd3iida-radio-label-text')
           .attr('x', function(d, i) {

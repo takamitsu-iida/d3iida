@@ -1,6 +1,6 @@
 /* global d3, d3iida */
 
-// 2016.11.01
+// 2016.11.03
 // Takamitsu IIDA
 // takamitsu.iida@gmail.com
 
