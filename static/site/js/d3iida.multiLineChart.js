@@ -21,7 +21,7 @@
       top: 20,
       right: 100,
       bottom: 20,
-      left: 100
+      left: 50
     };
 
     // d3.jsで描画する領域。軸の文字や凡例がはみ出てしまうので、マージンの分だけ小さくしておく。
@@ -49,8 +49,10 @@
       return d3.axisLeft(yScale).ticks(5);
     }
 
-    // 表示制御
+    // グラフ曲線の最後に名前を表示するかどうか
     var showNameAtLineEnd = false;
+
+    // グラフ曲線上に丸を描画するかどうか
     var showLineDot = false;
 
     // カスタムイベント
@@ -82,49 +84,108 @@
         var yextent = [
           d3.min(_data, function(d) {
             return d3.min(d.values, function(v) {
-              return v[valuesKeyY];
+              return v[valuesKeyY]; // v.temperature
             });
-          }), // v.temperature
+          }),
           d3.max(_data, function(d) {
             return d3.max(d.values, function(v) {
-              return v[valuesKeyY];
+              return v[valuesKeyY]; // v.temperature
             });
-          }) // v.temperature
+          })
         ];
 
         // Y軸方向のスケール関数と、ドメイン-レンジ指定
         yScale.domain(yextent).range([h, 0]).nice();
 
-        // 受け取ったデータを紐付けたSVGを作ることで、複数回call()されたときにSVGの重複作成を防止する
-        var svgAll = d3.select(this).selectAll('svg').data([_data]);
+        // ダミーデータを紐付けてSVGの重複作成を防止する
+        var svgAll = d3.select(this).selectAll('svg').data(['dummy']);
+        svgAll
+          // ENTER領域
+          .enter()
+          .append('svg')
+          // ENTER + UPDATE領域
+          .merge(svgAll)
+          .attr('width', width)
+          .attr('height', height);
 
-        // ENTER領域
-        // 既存のsvgがないならenter()領域に新規作成
-        var enterG = svgAll.enter()
-          .append('svg').attr('width', width).attr('height', height)
-          .append('g').classed('multiLineChartG', true).attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+        // チャートレイヤを作成
+        var chartLayerAll = d3.select(this).select('svg').selectAll('.chartLayer').data(['dummy']);
+        chartLayerAll
+          .enter()
+          .append('g')
+          .classed('chartLayer', true)
+          .merge(chartLayerAll)
+          .attr('width', w)
+          .attr('height', h)
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+        // chartLayerのセレクタはこの後、何度か使うのでキャッシュしておく
+        var chartLayer = d3.select(this).select('.chartLayer');
 
         // x軸を追加する。クラス名はCSSと合わせる
-        enterG.append('g').attr('class', 'x axis').attr('transform', 'translate(0,' + h + ')')
+        var xaxisAll = chartLayer.selectAll('.x-axis').data(['dummy']);
+        xaxisAll
+          .enter()
+          .append('g')
+          .attr('class', 'x-axis')
+          .merge(xaxisAll)
+          .attr('transform', 'translate(0,' + h + ')')
           .call(d3.axisBottom(xScale).ticks(12, '%I:%M'));
 
         // X軸に対してグリッド線を引く(Y軸と平行の線)
-        enterG.append('g').attr('class', 'grid').attr('transform', 'translate(0,' + h + ')')
+        var xgridAll = chartLayer.selectAll('.x-grid').data(['dummy']);
+        xgridAll
+          .enter()
+          .append('g')
+          .classed('x-grid', true)
+          .classed('grid', true)
+          .merge(xgridAll)
+          .attr('transform', 'translate(0,' + h + ')')
           .call(make_x_gridlines().tickSize(-h).tickFormat(''));
 
         // y軸を追加する。クラス名はCSSと合わせる
-        enterG.append('g').attr('class', 'y axis').call(d3.axisLeft(yScale));
+        var yaxisAll = chartLayer.selectAll('.y-axis').data(['dummy']);
+        yaxisAll
+          .enter()
+          .append('g')
+          .classed('y-axis', true)
+          .merge(yaxisAll)
+          .call(d3.axisLeft(yScale));
 
         // Y軸に対してグリッド線を引く(X軸と平行の線)
-        enterG.append('g').attr('class', 'grid').call(make_y_gridlines().tickSize(-w).tickFormat(''));
+        var ygridAll = chartLayer.selectAll('.y-grid').data(['dummy']);
+        ygridAll
+          .enter()
+          .append('g')
+          .classed('y-grid', true)
+          .classed('grid', true)
+          .merge(ygridAll)
+          .call(make_y_gridlines().tickSize(-w).tickFormat(''));
 
-        // X軸Y軸のラベルを追加
-        if (xAxisText) {
-          enterG.append('text').attr('x', w - 10).attr('y', h - 10).style('text-anchor', 'end').text(xAxisText);
-        }
-        if (yAxisText) {
-          enterG.append('text').attr('transform', 'rotate(-90)').attr('y', 6).attr('dy', '.71em').style('text-anchor', 'end').text(yAxisText);
-        }
+        // X軸のラベルを追加
+        var xaxisTextAll = chartLayer.selectAll('.x-axis-text').data(['dummy']);
+        xaxisTextAll
+          .enter()
+          .append('text')
+          .classed('x-axis-text', true)
+          .merge(xaxisTextAll)
+          .attr('x', w - 10)
+          .attr('y', h - 10)
+          .style('text-anchor', 'end')
+          .text(xAxisText);
+
+        // Y軸のラベルを追加
+        var yaxisTextAll = chartLayer.selectAll('.y-axis-text').data(['dummy']);
+        yaxisTextAll
+          .enter()
+          .append('text')
+          .classed('y-axis-text', true)
+          .merge(yaxisTextAll)
+          .attr('transform', 'rotate(-90)')
+          .attr('y', 6)
+          .attr('dy', '.71em')
+          .style('text-anchor', 'end')
+          .text(yAxisText);
 
         // グラフの曲線となるline()関数を作成する
         var line = d3.line()
@@ -135,26 +196,38 @@
             return yScale(d[valuesKeyY]); // d.temperature
           });
 
-        // グラフ曲線の描画領域となる'g'をデータの数だけ作成する
-        var gg = enterG.selectAll('.line').data(_data).enter().append('g');
+        // グラフ曲線の描画レイヤはcall()のたびに新規作成し、既存のレイヤは削除する
+        chartLayer.selectAll('.plotLayer').remove();
 
-        // ggにグラフ曲線のpathを追加する
-        gg
+        // データの数だけレイヤを新規作成する
+        var plotLayer = chartLayer.selectAll('.plotLayer').data(_data)
+          // ENTER領域
+          .enter()
+          .append('g')
+          .classed('plotLayer', true);
+
+        // plotLayerにグラフ曲線のpathを追加する
+        // id属性を使って凡例やcircleと対応付けられるようにする
+        plotLayer
           .append('path')
-          .attr('class', 'line')
           .attr('id', function(d) {
-            return 'tag' + d.name.replace(/\s+/g, '');
-          }) // IDにnameを入れて識別できるようにする
+             // id属性にnameを入れて識別できるようにしておく
+            var name = 'tag' + d.name.replace(/\s+/g, '');
+            // console.log(name); // tag水深1m
+            return name;
+          })
           .attr('d', function(d) {
+            // データはvalues配列
             return line(d.values);
           })
           .style('stroke', function(d) {
             return color(d.name);
-          });
+          })
+          .classed('line', true);
 
         // グラフ曲線の末尾にデータ名を表示する
         if (showNameAtLineEnd) {
-          gg
+          plotLayer
             .append('text')
             .datum(function(d) {
               return {
@@ -168,8 +241,9 @@
             .attr('x', 10)
             .attr('dy', '.35em')
             .attr('id', function(d) {
+              // id属性にnameを入れて識別できるようにしておく
               return 'tag' + d.name.replace(/\s+/g, '');
-            }) // IDにnameを入れて識別できるようにする
+            })
             .text(function(d) {
               return d.name;
             });
@@ -177,11 +251,17 @@
 
         // グラフ曲線上に点を打つ
         if (showLineDot) {
-          // ggに各データ上に点を打つための領域'g'を追加し、クリップパスを指定する
-          var points = gg.selectAll('.dots').data(_data).enter().append('g');
-          points.selectAll('.linedot')
+          // 各データ上に点を打つための領域'g'を追加し、クリップパスを指定する
+          var dotLayer = plotLayer.selectAll('.dotLayer').data(_data)
+            // ENTER領域
+            .enter()
+            .append('g')
+            .classed('dotLayer', true);
+
+          dotLayer.selectAll('.linedot')
             .data(function(d) {
-              // d.valuesだけあれば点を描画できるが、色付けにはnameキーが必要なので新たな配列を作って紐付ける
+              // d.valuesだけあれば点を描画できるが
+              // 色付けのためにnameキーが必要なので新たな配列を作って紐付ける
               return d.values.map(function(v) {
                 return {
                   name: d.name,
@@ -191,10 +271,11 @@
             })
             .enter()
             .append('circle')
-            .attr('class', 'linedot')
+            .classed('linedot', true)
             .attr('id', function(d) {
+              // id属性にnameを入れて識別できるようにしておく
               return 'tag' + d.name.replace(/\s+/g, '');
-            }) // IDにnameを入れて識別できるようにする
+            })
             .attr('r', 6)
             .attr('stroke', function(d) {
               return color(d.name);
@@ -205,7 +286,7 @@
         }
 
         // 凡例を作成するための領域'g'を追加する
-        var legend = enterG.selectAll('.legend')
+        var legend = plotLayer.selectAll('.legend')
           .data(function() {
             return names.map(function(d) {
               return {
@@ -216,7 +297,7 @@
           })
           .enter()
           .append('g')
-          .attr('class', 'legend')
+          .classed('legend', true)
           .attr('transform', function(d, i) {
             return 'translate(' + w + ',' + (i * 20 + 20) + ')';
           });
@@ -246,27 +327,34 @@
           });
 
         // マウスの動きに追従するフォーカスを作成する
-        var focus = enterG.append('g').attr('class', 'focus').style('display', 'none');
+        var focus = plotLayer
+          .append('g')
+          .classed('focus', true)
+          .style('display', 'none');
 
         // データの数だけ焦点になる点とテキスト、および横線を作成
         _data.forEach(function(d, i) {
-          focus.append('g')
-            .attr('class', 'focusPoint' + i)
+          focus
+            .append('g')
             .attr('id', function() {
               return 'tag' + d.name.replace(/\s+/g, '');
-            }) // IDにnameを入れて識別できるようにする
+            })
+            .classed('focusPoint' + i, true)
             .append('circle')
             .attr('r', 6);
-          focus.select('.focusPoint' + i)
+
+          focus
+            .select('.focusPoint' + i)
             .append('text')
             .attr('x', 9)
             .attr('dy', '.35em');
+
           focus
             .append('line')
             .attr('id', function() {
               return 'tag' + d.name.replace(/\s+/g, '');
-            }) // IDにnameを入れて識別できるようにする
-            .attr('class', 'focusLineY' + i)
+            })
+            .classed('focusLineY' + i, true)
             .style('stroke', 'blue')
             .style('stroke-dasharray', '3,3')
             .style('opacity', 0.5)
@@ -275,8 +363,9 @@
         });
 
         // 縦線を追加する
-        focus.append('line')
-          .attr('class', 'focusLineX')
+        focus
+          .append('line')
+          .classed('focusLineX', true)
           .style('stroke', 'blue')
           .style('stroke-dasharray', '3,3')
           .style('opacity', 0.5)
@@ -289,7 +378,8 @@
         }).left;
 
         // マウスの動きを捕捉するためのオーバーレイを'g'に作成してイベントハンドラを登録する
-        enterG.append('rect')
+        chartLayer
+          .append('rect')
           .attr('class', 'overlay')
           .attr('width', w)
           .attr('height', h)
@@ -310,12 +400,12 @@
             });
             var i;
             for (i = 0; i < series.length; i++) {
-              var selectedFocusPoint = enterG.selectAll('.focusPoint' + i);
+              var selectedFocusPoint = chartLayer.selectAll('.focusPoint' + i);
               if (selectedFocusPoint) {
                 selectedFocusPoint.select('text').text(series[i][valuesKeyY]);
                 selectedFocusPoint.attr('transform', 'translate(' + xScale(series[i][valuesKeyX]) + ',' + yScale(series[i][valuesKeyY]) + ')');
               }
-              var selectedFocusLineY = enterG.selectAll('.focusLineY' + i);
+              var selectedFocusLineY = chartLayer.selectAll('.focusLineY' + i);
               if (selectedFocusLineY) {
                 selectedFocusLineY.attr('transform', 'translate(0,' + yScale(series[i][valuesKeyY]) + ')');
               }
@@ -323,6 +413,7 @@
             // 縦線をマウスに追従して移動する。最初のデータ(series[0])で処理する。
             focus.select('.focusLineX').attr('transform', 'translate(' + xScale(series[0][valuesKeyX]) + ',0)');
           });
+        //
         //
       }); // _selection.each(function(_data) {
     } // function exports(_selection) {
@@ -364,6 +455,7 @@
         return width;
       }
       width = _;
+      w = width - margin.left - margin.right;
       return this;
     };
 
@@ -372,6 +464,7 @@
         return height;
       }
       height = _;
+      h = height - margin.top - margin.bottom;
       return this;
     };
 
