@@ -1,6 +1,7 @@
 /* global d3, d3iida */
 
-// グローバルに独自の名前空間を定義する
+// d3iida.startup.js
+// グローバルに名前空間'd3iida'を定義する
 (function() {
   // このthisはグローバル空間
   this.d3iida = this.d3iida || (function() {
@@ -8,7 +9,7 @@
     var utils = {};
 
     // アプリのデータを取り込む場合、appdata配下にぶら下げる
-    var appdata;
+    var appdata = {};
 
     // ヒアドキュメント経由で静的データを取り込む場合、テキストデータをheredoc配下にぶら下げる
     var heredoc = {};

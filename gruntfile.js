@@ -5,7 +5,7 @@ module.exports = function (grunt) {
       files: {
         // 元ファイルの指定
         src: [
-          'static/site/js/d3iida.js',
+          'static/site/js/d3iida.startup.js',
           'static/site/js/d3iida.datamanager.js',
           'static/site/js/d3iida.barChart.js',
           'static/site/js/d3iida.lineChart.js',
