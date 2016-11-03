@@ -113,3 +113,16 @@ strong {
   border: 1px solid gray;
   overflow: hidden;
 }
+
+.d3iida-tooltip {
+  background-color      : rgba(68,136,187,0.5);
+  margin                : 5px;
+  height                : 60px;
+  width                 : 120px;
+  padding-left          : 5px;
+  padding-top           : 5px;
+  -webkit-border-radius : 6px;
+  -moz-border-radius    : 6px;
+  border-radius         : 6px;
+  box-shadow            : 0 0 0.75em 0 #888;
+}

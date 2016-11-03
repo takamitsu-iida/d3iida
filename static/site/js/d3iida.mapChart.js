@@ -165,7 +165,6 @@
       });
 
     //
-    //
     // call()されたときに呼ばれる公開関数
     //
     function exports(_selection) {
@@ -231,7 +230,12 @@
           .attr('class', 'sites')
           .on('mouseover', function(d) {
             console.log(d.properties.city);
-          });
+          })
+          .call(d3iida.tooltip(
+            function(d, i) {
+              return '<b>' + d.properties.city + '</b>';
+            }
+          ));
 
         // コンテナにブラシ制御用の新しいDIVを作り、そこにブラシ制御用のSVGを追加する
         d3.select(this).selectAll('#brushControl').data(['dummy']).enter()
@@ -330,11 +334,10 @@
     var prefGovLoc = d3iida.geodata.prefectureGovernmentLocationMap;
 
     // 拠点をテーブル表示するモジュールsimpleTableをインスタンス化する
-    // crossfilterでフィルタされた県庁所在地の配列が渡される
-    var table = d3iida.simpleTable();
+    var table = d3iida.simpleTable(function(rowObj) {
+      // crossfilterでフィルタされた県庁所在地の配列の各行が渡されるので、
+      // 適宜フィルタをして<td>タグで表示したいものだけを配列にして返却する
 
-    // tableに載せたいデータを配列で返却する関数
-    table.rowFilter(function(rowObj) {
       // console.log(rowObj);
       // データ構造はd3iida.geodata.prefectures.jsを見れば分かる
       // {

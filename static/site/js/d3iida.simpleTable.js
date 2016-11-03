@@ -4,13 +4,21 @@
 // Takamitsu IIDA
 // takamitsu.iida@gmail.com
 
+// 使い方
+// d3iida.simpleTable(function(row) {
+//   この関数が_accessorになる
+//   return [row.prop1, row.prop2];
+// });
+
 // simpleTableモジュール
 (function() {
-  d3iida.simpleTable = function module() {
-    //
-    // コンテナに紐付けられているデータ配列が[rowObj1, rowObj2, rowObj3, ...]として、
+  d3iida.simpleTable = function module(_accessor) {
+    // _accessor関数は、
+    // コンテナに紐付けられているデータ配列が[rowObj1, rowObj2, rowObj3, ...]であるとして、
     // 各オブジェクトのなかから表示したい情報を配列にして返す関数
-    // デフォルト動作は、オブジェクトに格納されているvalueの列挙。
+
+    // _accessor関数が指定されなかった場合は、
+    // オブジェクトに格納されているvalueを列挙する
     var rowFilter = function(rowObj) {
       return d3.values(rowObj);
     };
@@ -35,6 +43,9 @@
           .append('tr')
           .selectAll('td')
           .data(function(row) {
+            if (_accessor) {
+              return _accessor(row);
+            }
             return rowFilter(row);
           })
           .enter()
@@ -52,6 +63,9 @@
           // UPDATE領域
           .selectAll('td')
           .data(function(row) {
+            if (_accessor) {
+              return _accessor(row);
+            }
             return rowFilter(row);
           })
           .text(function(d) {
