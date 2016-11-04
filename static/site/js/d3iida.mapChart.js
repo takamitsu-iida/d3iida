@@ -9,6 +9,7 @@
 // crossfilter
 // d3iida.radioButton.js
 // d3iida.simpleTable.js
+// d3iida.tooltip.js
 // d3iida.geodata.japan.js 日本地図のtopojsonデータ
 // d3iida.geodata.prefectures.js 県庁所在地の地点データ
 
@@ -56,7 +57,6 @@
     var projection = d3.geoMercator()
       .scale(scaleSize)
       .translate([0, 0]);
-      // .center(center) // center()は最初にcall()するときに決定するので指定しない
 
     // 地図の中心点
     var center = [139.0032936, 38.5139088];
@@ -67,12 +67,18 @@
     // 地図用のパスジェネレータ
     var geoPath = d3.geoPath().projection(projection);
 
+    // d3.zoom()オブジェクト
+    // scaleExtentに指定する大きさは、経験上の数字で、根拠はない
+    var zoom = d3.zoom().scaleExtent([scaleSize, scaleSize * 20]).on('zoom', onZoom);
+
     // ズームイベントのハンドラ
     function onZoom() {
-      // ブラシで領域を指定するので、projectionを変更する
-      var k = d3.event.transform.k;
+      // イベントから座標と拡大値を取り出す
       var x = d3.event.transform.x;
       var y = d3.event.transform.y;
+      var k = d3.event.transform.k;
+
+      // ブラシで領域を指定するので、projectionを変更する
       projection.translate([x, y]).scale(scaleSize * k);
 
       // 新しいprojectionでパスを生成し直す
@@ -86,29 +92,47 @@
         .attr('cy', function(d) {
           return projection(d.geometry.coordinates)[1];
         });
-
-      /*
-       * 単純に移動・拡大するだけでよければ、これで事足りる
-       *
-      // 県のパスを移動・拡大する
-      svg.selectAll('.prefecture')
-        .attr('transform', d3.event.transform)
-        .style('stroke-width', 1.0 / d3.event.transform.k + 'px');
-
-      // 拠点のcircleを移動・拡大する
-      svg.selectAll('.sites')
-        .attr('transform', d3.event.transform)
-        .style('stroke-width', 1.0 / d3.event.transform.k + 'px')
-        .attr('r', function() {
-          var r = siteRadius / d3.event.transform.k;
-          return d3.max([r, 0.8]);
-        });
-      */
     }
 
-    // d3.zoom()オブジェクト
-    // scaleExtentに指定する大きさは、経験上の数字で、根拠はない
-    var zoom = d3.zoom().scaleExtent([scaleSize, scaleSize * 10]).on('zoom', onZoom);
+    var active = d3.select(null);
+
+    function zoomToBound(d) {
+      // プロジェクション関数を初期化する
+      projection.scale(scaleSize).translate([0, 0]);
+
+      // 境界ボックスを取り出す
+      var bounds = geoPath.bounds(d);
+
+      // 境界ボックスの真ん中の座標をtranslate配列にする
+      var x = (bounds[0][0] + bounds[1][0]) / 2;
+      var y = (bounds[0][1] + bounds[1][1]) / 2;
+      var centerBounds = [x, y];
+
+      // 拡大するスケールを決める
+      var dx = bounds[1][0] - bounds[0][0];
+      var dy = bounds[1][1] - bounds[0][1];
+      // var scale = 0.9 / Math.max(dx / w, dy / h);
+      var scale = Math.max(1, Math.min(scaleSize * 20, 0.9 / Math.max(dx / w, dy / h)));
+
+      svg
+        .transition()
+        .duration(750)
+        .call(zoom.transform, d3.zoomIdentity.translate(w / 2, h / 2).scale(scale).translate(-centerBounds[0], -centerBounds[1]));
+    }
+
+    function resetZoom() {
+      active.classed('active', false);
+      active = d3.select(null);
+
+      // プロジェクション関数を初期化する
+      projection.scale(scaleSize).translate([0, 0]);
+
+      // 位置を中心に戻す
+      svg
+        .transition()
+        .duration(750)
+        .call(zoom.transform, d3.zoomIdentity.translate(w / 2, h / 2).scale(scaleSize).translate(-centerPoint[0], -centerPoint[1]));
+    }
 
     // brushの有効・無効
     var isBrushEnabled = false;
@@ -125,7 +149,8 @@
       // 紐付けるデータはENTER領域を作るためのダミーなので、なんでもよい
       svg.selectAll('.brushLayer').data(['dummy']).enter()
         .append('g')
-        .attr('width', w).attr('height', h)
+        .attr('width', w)
+        .attr('height', h)
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
         .classed('brushLayer', true)
         .call(d3.brush().extent([[0, 0], [w, h]]).on('brush', function() {
@@ -175,17 +200,34 @@
         // ENTER領域
         svg = svgAll.enter()
           .append('svg')
-          .attr('width', width).attr('height', height)
+          .attr('width', width)
+          .attr('height', height)
           .attr('preserveAspectRatio', 'xMinYMin meet')
           .attr('viewBox', '0 0 ' + width + ' ' + height)
           .style('overflow', 'hidden')
-          .classed('svg-content-responsive', true);
+          .classed('svg-content-responsive', true)
+          .on('click', function() {
+            // これがないと移動やズーム動作でクリックが発動してしまう
+            if (d3.event.defaultPrevented) {
+              d3.event.stopPropagation();
+            }
+            // console.log('svg clicked');
+          }, true);
 
-        // ズーム処理は一番上のsvgに設定するとよい
+        svg.append('rect')
+          .attr('width', width)
+          .attr('height', height)
+          .style('fill', 'none')
+          .style('pointer-events', 'all')
+          .on('click', resetZoom);
+
+        // ズーム処理は最上位のsvgに設定するとよい
         svg.call(zoom);
         svg.call(zoom.transform, d3.zoomIdentity.translate(w / 2, h / 2).scale(scaleSize).translate(-centerPoint[0], -centerPoint[1]));
 
-        // svg.on('dblclick.zoom', null);  // ダブルクリックでのズームをやめる場合はnullを指定
+        // 地図の外をクリックしたときにズームをリセットするイベントを仕込んでいるので、
+        // ダブルクリックでのズームと相性が悪い
+        svg.on('dblclick.zoom', null);  // ダブルクリックでのズームをやめる場合はnullを指定
         // svg.on('wheel.zoom', null);  // マウスホイールでのズームをやめる場合はnullを指定
         // svg.on('mousedown.zoom', null);  // ドラッグでの移動（パン動作）をやめる場合はnullを指定
 
@@ -194,7 +236,8 @@
         // 地図を描画するレイヤ 'g'
         // CSSファイルも見ること
         var mapLayer = svg.append('g')
-          .attr('width', w).attr('height', h)
+          .attr('width', w)
+          .attr('height', h)
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
           .classed('mapLayer', true);
 
@@ -209,11 +252,21 @@
           })
           .on('click', function(d) {
             console.log(d.properties.name_local);
+            if (active.node() === this) {
+              resetZoom();
+              return;
+            }
+            active.classed('active', false);
+            active = d3.select(this).classed('active', true);
+            zoomToBound(d);
+            if (d3.event.defaultPrevented) d3.event.stopPropagation();
           });
 
         // サイトの円を描画するレイヤ 'g'
         var siteLayer = svg.append('g')
-          .attr('width', w).attr('height', h).attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+          .attr('width', w)
+          .attr('height', h)
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
           .classed('siteLayer', true);
 
         // siteLayerに拠点の円を追加
