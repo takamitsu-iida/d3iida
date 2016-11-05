@@ -16,8 +16,9 @@
 // 地図モジュール
 (function() {
   d3iida.mapChart = function module() {
-    // 一番上位のSVG
-    var svg;
+    // 一番上位のSVGを選択するセレクタ
+    // call()時にセットされる
+    var svg = d3.select(null);
 
     // SVGの枠の大きさ
     var width = 600;
@@ -39,12 +40,90 @@
     // カスタムイベントを登録する
     var dispatch = d3.dispatch('brushing');
 
+    // クリックで移動可能な県
+    var cities = [
+      {
+        id: 'all',
+        name: '日本全域'
+      },
+      {
+        id: 'hokkaido',
+        name: '北海道'
+      },
+      {
+        id: 'tokyo',
+        name: '東京'
+      },
+      {
+        id: 'aichi',
+        name: '愛知'
+      },
+      {
+        id: 'osaka',
+        name: '大阪'
+      },
+      {
+        id: 'fukuoka',
+        name: '福岡'
+      },
+      {
+        id: 'okinawa',
+        name: '沖縄'
+      }
+    ];
+
+    // クリックで都市に移動するためのリンクを追加する
+    function initControls(container) {
+      // <div class='d3iida-controls'></div>をひとつだけ作成する
+      container.selectAll('.d3iida-controls').data(['dummy'])
+        .enter()
+        .append('div')
+        .classed('d3iida-controls', true)
+        .append('div')
+        .classed('d3iida-control', true);
+
+      // cities配列を紐付けた<a>を作成する
+      var aAll = container.select('.d3iida-control').selectAll('a').data(cities);
+      aAll
+        .enter()
+        .append('a')
+        .on('click', function(d) {
+          // d3.jsが挙動不審で、先頭データに紐付けられるオブジェクトが、違うものになってしまう
+          // このあと、別途clickイベントを上書きする
+          // console.log(d);
+          zoomToCity(d.id);
+          container.select('.d3iida-control').selectAll('a').classed('active', false);
+          d3.select(this).classed('active', true);
+        })
+        .merge(aAll)
+        .html(function(d) {
+          return d.name;
+        });
+
+      aAll
+        .exit()
+        .remove();
+
+      // 先頭のリンクは、都市ではないので、クリック時にはズームをリセットする
+      container
+        .select('.d3iida-control')
+        .select('a')
+        .classed('active', true)
+        .on('click', function(d) {
+          // なぜか、このdが期待と違う
+          console.log(d);
+          resetZoom();
+          container.select('.d3iida-control').selectAll('a').classed('active', false);
+          d3.select(this).classed('active', true);
+        });
+    }
+
     // 拠点の'circle'の半径
-    var siteRadius = 4.0;
+    var siteRadius = 5.0;
 
     // 地図の縮尺
     // 小さいほど広域が表示される
-    // 画面サイズと合わせて調整が必要で、経験則的に決める必要がある
+    // 画面サイズに合わせて調整が必要で、経験則的に決める必要がある
     var scaleSize = 35;
 
     // 日本地図のtopojsonデータ
@@ -57,6 +136,13 @@
     var projection = d3.geoMercator()
       .scale(scaleSize)
       .translate([0, 0]);
+
+    // プロジェクション関数を初期状態に戻す
+    function initProjection() {
+      projection
+        .scale(scaleSize)
+        .translate([0, 0]);
+    }
 
     // 地図の中心点
     var center = [139.0032936, 38.5139088];
@@ -78,13 +164,13 @@
       var y = d3.event.transform.y;
       var k = d3.event.transform.k;
 
-      // ブラシで領域を指定するので、projectionを変更する
+      // ブラシで領域を指定するので、プロジェクションをズームにあわせて変更する
       projection.translate([x, y]).scale(scaleSize * k);
 
-      // 新しいprojectionでパスを生成し直す
+      // 新しいプロジェクションでパスを生成し直す
       svg.selectAll('.prefecture').attr('d', geoPath);
 
-      // 新しいprojectionで位置を計算し直す
+      // 新しいプロジェクションで拠点の位置を計算し直す
       svg.selectAll('.sites')
         .attr('cx', function(d) {
           return projection(d.geometry.coordinates)[0];
@@ -94,11 +180,12 @@
         });
     }
 
-    var active = d3.select(null);
+    // 選択した県
+    var activePrefecture = d3.select(null);
 
     function zoomToBound(d) {
-      // プロジェクション関数を初期化する
-      projection.scale(scaleSize).translate([0, 0]);
+      // プロジェクション関数を初期状態に戻す
+      initProjection();
 
       // 境界ボックスを取り出す
       var bounds = geoPath.bounds(d);
@@ -120,12 +207,22 @@
         .call(zoom.transform, d3.zoomIdentity.translate(w / 2, h / 2).scale(scale).translate(-centerBounds[0], -centerBounds[1]));
     }
 
-    function resetZoom() {
-      active.classed('active', false);
-      active = d3.select(null);
+    // 都市名を指定してズーム
+    function zoomToCity(city) {
+      var d = features.filter(function(d) {
+        return d.properties.name.toLowerCase() === city;
+      })[0];
+      if (d !== undefined && d !== null) {
+        zoomToBound(d);
+      }
+    }
 
-      // プロジェクション関数を初期化する
-      projection.scale(scaleSize).translate([0, 0]);
+    function resetZoom() {
+      // プロジェクション関数を初期状態に戻す
+      initProjection();
+
+      activePrefecture.classed('active', false);
+      activePrefecture = d3.select(null);
 
       // 位置を中心に戻す
       svg
@@ -194,11 +291,23 @@
     //
     function exports(_selection) {
       _selection.each(function(_data) {
-        // svgを作成する
-        var svgAll = d3.select(this).selectAll('svg').data([_data]);
+        var container = _selection;
 
-        // ENTER領域
-        svg = svgAll.enter()
+        // コンテナにnullを紐付けてcall()したら、全て削除
+        if (!_data) {
+          container.selectAll('div').remove();
+          container.selectAll('svg').remove();
+          return;
+        }
+
+        // 都市選択用のHTMLを追加する
+        initControls(container);
+
+        // svgを一つ作成する
+        var svgAll = container.selectAll('svg').data(['dummy']);
+        svgAll
+          // ENTER領域
+          .enter()
           .append('svg')
           .attr('width', width)
           .attr('height', height)
@@ -212,87 +321,110 @@
               d3.event.stopPropagation();
             }
             // console.log('svg clicked');
-          }, true);
+          }, true)
+          // ズーム処理は最上位のsvgに設定するとよい
+          .call(zoom)
+          // 地図外をクリックしたときにズームをリセットするイベントを仕込んでいるため
+          // ダブルクリックでのズームと相性が悪い
+          .on('dblclick.zoom', null); // ダブルクリックでのズームをやめる場合はnullを指定
+          // .on('wheel.zoom', null) // マウスホイールでのズームをやめる場合はnullを指定
+          // .on('mousedown.zoom', null) // ドラッグでの移動（パン動作）をやめる場合はnullを指定
 
-        svg.append('rect')
-          .attr('width', width)
-          .attr('height', height)
-          .style('fill', 'none')
-          .style('pointer-events', 'all')
-          .on('click', resetZoom);
+        // 最上位のsvgのセレクタ
+        // exports()の外側の関数でsvgを操作するのに必要
+        svg = container.select('svg');
 
-        // ズーム処理は最上位のsvgに設定するとよい
-        svg.call(zoom);
+        // ズームイベントを発動して、中心位置に移動する
         svg.call(zoom.transform, d3.zoomIdentity.translate(w / 2, h / 2).scale(scaleSize).translate(-centerPoint[0], -centerPoint[1]));
 
-        // 地図の外をクリックしたときにズームをリセットするイベントを仕込んでいるので、
-        // ダブルクリックでのズームと相性が悪い
-        svg.on('dblclick.zoom', null);  // ダブルクリックでのズームをやめる場合はnullを指定
-        // svg.on('wheel.zoom', null);  // マウスホイールでのズームをやめる場合はnullを指定
-        // svg.on('mousedown.zoom', null);  // ドラッグでの移動（パン動作）をやめる場合はnullを指定
-
         // レイヤを順番に作成
+        // スタイルの指定はCSSファイルを見ること
+        // 特に pointer-events:を指定するかどうかで、マウスイベントを拾うかどうかを制御している
+
+        // ズーム動作をリセットするための'rect'を追加する
+        var resetRectAll = container.select('svg').selectAll('.resetRect').data(['dummy']);
+        resetRectAll
+          .enter()
+          .append('rect')
+          .classed('resetRect', true)
+          .style('fill', 'none')
+          .style('pointer-events', 'all')
+          .merge(resetRectAll)
+          .on('click', resetZoom)
+          .attr('width', width)
+          .attr('height', height);
 
         // 地図を描画するレイヤ 'g'
-        // CSSファイルも見ること
-        var mapLayer = svg.append('g')
+        var mapLayerAll = container.select('svg').selectAll('.mapLayer').data(['dummy']);
+        mapLayerAll
+          .enter()
+          .append('g')
+          .classed('mapLayer', true)
+          .merge(mapLayerAll)
           .attr('width', w)
           .attr('height', h)
-          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-          .classed('mapLayer', true);
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
         // mapLayerに県を描画するパスを追加
-        // CSSファイルも見ること
-        // pointer-events     : all;
-        mapLayer.selectAll('.prefecture').data(features).enter()
+        container.select('.mapLayer').selectAll('.prefecture').data(features)
+          .enter()
           .append('path')
           .attr('d', geoPath)
           .attr('class', function(d) {
             return 'prefecture ' + d.properties.name;
           })
           .on('click', function(d) {
-            console.log(d.properties.name_local);
-            if (active.node() === this) {
+            // console.log(d.properties.name_local);
+            if (activePrefecture.node() === this) {
               resetZoom();
               return;
             }
-            active.classed('active', false);
-            active = d3.select(this).classed('active', true);
+            activePrefecture.classed('active', false);
+            activePrefecture = d3.select(this).classed('active', true);
             zoomToBound(d);
             if (d3.event.defaultPrevented) d3.event.stopPropagation();
           });
 
-        // サイトの円を描画するレイヤ 'g'
-        var siteLayer = svg.append('g')
+        // サイトを描画するレイヤ
+        var siteLayerAll = container.select('svg').selectAll('.siteLayer').data(['dummy']);
+        siteLayerAll
+          .enter()
+          .append('g')
+          .classed('siteLayer', true)
+          .merge(siteLayerAll)
           .attr('width', w)
           .attr('height', h)
-          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-          .classed('siteLayer', true);
+          .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-        // siteLayerに拠点の円を追加
-        // CSSファイルも見ること
-        siteLayer.selectAll('.sites').data(_data.features).enter()
+        // siteLayerに拠点を追加
+        var sitesAll = container.select('.siteLayer').selectAll('.sites').data(_data.features);
+        sitesAll
+          .enter()
           .append('circle')
+          .classed('sites', true)
+          .attr('r', siteRadius)
           .attr('cx', function(d) {
             return projection(d.geometry.coordinates)[0];
           })
           .attr('cy', function(d) {
             return projection(d.geometry.coordinates)[1];
           })
-          .attr('r', siteRadius)
-          .attr('class', 'sites')
-          .on('mouseover', function(d) {
+          .on('click', function(d) {
             console.log(d.properties.city);
           })
           .call(
             d3iida.tooltip(function(d, i) {
               return '<b>' + d.properties.city + '</b>';
             })
-            .selectString('#mapChart')
           );
 
-        // コンテナにブラシ制御用の新しいDIVを作り、そこにブラシ制御用のSVGを追加する
-        d3.select(this).selectAll('#brushControl').data(['dummy']).enter()
+        sitesAll
+          .exit()
+          .remove();
+
+        // コンテナにブラシ制御用の<div>を作り、ラジオボタンをcall()する
+        container.selectAll('#brushControl').data(['dummy'])
+          .enter()
           .append('div')
           .attr('id', 'brushControl')
           .datum(brushControlData)
@@ -375,12 +507,15 @@
     return exports;
   };
 
-  // 使い方  <div id='mapChart'></div>内に地図を描画する
+  // 使い方
   d3iida.mapChart.example = function() {
-    // <div id='mapChart'></div>
+    // コンテナは<div id='mapChart'>として、ここに地図を描画する
     var mapContainer = d3.select('#mapChart');
+
+    // コンテナの横幅を取り出して、それに合わせる
     var mapContainerWidth = mapContainer.node().clientWidth;
 
+    // ブラシで選択した拠点を表示するコンテナ
     // <div id='siteTable'></div>
     var tableContainer = d3.select('#siteTable');
 
