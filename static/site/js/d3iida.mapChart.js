@@ -321,6 +321,8 @@
           .attr('preserveAspectRatio', 'xMinYMin meet')
           .attr('viewBox', '0 0 ' + width + ' ' + height)
           .style('overflow', 'hidden')
+          // 背景を海の色にするにはこのスタイルを有効にする。ただし、とても見づらい
+          // .style('background', '#90D1FF')
           .classed('svg-content-responsive', true)
           .on('click', function() {
             // これがないと移動やズーム動作でクリックが発動してしまう
@@ -337,7 +339,12 @@
           // .on('wheel.zoom', null) // マウスホイールでのズームをやめる場合はnullを指定
           // .on('mousedown.zoom', null) // ドラッグでの移動（パン動作）をやめる場合はnullを指定
 
-        // 最上位のsvgのセレクタ
+        svgAll
+          // UPDATE領域
+          .attr('width', width)
+          .attr('height', height);
+
+        // 最上位のsvgを選択するセレクタ
         // exports()の外側の関数でsvgを操作するのに必要
         svg = container.select('svg');
 
