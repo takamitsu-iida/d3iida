@@ -33,7 +33,6 @@
     };
 
     // チャート描画領域のサイズw, h
-    // 軸や凡例がはみ出てしまうので、マージンの分だけ小さくしておく。
     var w = width - margin.left - margin.right;
     var h = height - margin.top - margin.bottom;
 
@@ -43,32 +42,25 @@
     // クリックで移動可能な県
     var cities = [
       {
-        id: 'all',
-        name: '日本全域'
+        id: 'all', name: '日本全域'
       },
       {
-        id: 'hokkaido',
-        name: '北海道'
+        id: 'hokkaido', name: '北海道'
       },
       {
-        id: 'tokyo',
-        name: '東京'
+        id: 'tokyo', name: '東京'
       },
       {
-        id: 'aichi',
-        name: '愛知'
+        id: 'aichi', name: '愛知'
       },
       {
-        id: 'osaka',
-        name: '大阪'
+        id: 'osaka', name: '大阪'
       },
       {
-        id: 'fukuoka',
-        name: '福岡'
+        id: 'fukuoka', name: '福岡'
       },
       {
-        id: 'okinawa',
-        name: '沖縄'
+        id: 'okinawa', name: '沖縄'
       }
     ];
 
@@ -88,14 +80,17 @@
         .enter()
         .append('a')
         .on('click', function(d) {
-          // d3.jsが挙動不審で、先頭データに紐付けられるオブジェクトが、違うものになってしまう
-          // このあと、別途clickイベントを上書きする
           // console.log(d);
           zoomToCity(d.id);
           container.select('.d3iida-control').selectAll('a').classed('active', false);
           d3.select(this).classed('active', true);
         })
-        .merge(aAll)
+        // .merge(aAll)
+        .html(function(d) {
+          return d.name;
+        });
+
+      aAll
         .html(function(d) {
           return d.name;
         });
@@ -105,17 +100,17 @@
         .remove();
 
       // 先頭のリンクは、都市ではないので、クリック時にはズームをリセットする
-      container
-        .select('.d3iida-control')
+      container.select('.d3iida-control')
         .select('a')
         .classed('active', true)
         .on('click', function(d) {
-          // なぜか、このdが期待と違う
-          console.log(d);
+          // なぜか、このdが期待と違い、コンテナに紐付いたデータになってしまう
+          // どのみちこの値は使わないのでよいのだが、バグなのか、ちょっと気になる
           resetZoom();
           container.select('.d3iida-control').selectAll('a').classed('active', false);
           d3.select(this).classed('active', true);
         });
+      //
     }
 
     // 拠点の'circle'の半径
@@ -124,7 +119,7 @@
     // 地図の縮尺
     // 小さいほど広域が表示される
     // 画面サイズに合わせて調整が必要で、経験則的に決める必要がある
-    var scaleSize = 35;
+    var scaleSize = 40;
 
     // 日本地図のtopojsonデータ
     var geodata = d3iida.geodata.japan;
@@ -144,17 +139,18 @@
         .translate([0, 0]);
     }
 
-    // 地図の中心点
+    // 地図の中心点となる緯度経度
+    // 経験則的に決めたもので、わりと適当
     var center = [139.0032936, 38.5139088];
 
-    // projectionで変換した初期センター値
+    // プロジェクション関数を通して計算した地図の中心点の画面上の座標
     var centerPoint = projection(center);
 
     // 地図用のパスジェネレータ
     var geoPath = d3.geoPath().projection(projection);
 
     // d3.zoom()オブジェクト
-    // scaleExtentに指定する大きさは、経験上の数字で、根拠はない
+    // scaleExtentは初期の縮尺の20倍まで拡大
     var zoom = d3.zoom().scaleExtent([scaleSize, scaleSize * 20]).on('zoom', onZoom);
 
     // ズームイベントのハンドラ
@@ -164,7 +160,7 @@
       var y = d3.event.transform.y;
       var k = d3.event.transform.k;
 
-      // ブラシで領域を指定するので、プロジェクションをズームにあわせて変更する
+      // プロジェクションをズームにあわせて変更する
       projection.translate([x, y]).scale(scaleSize * k);
 
       // 新しいプロジェクションでパスを生成し直す
@@ -178,11 +174,22 @@
         .attr('cy', function(d) {
           return projection(d.geometry.coordinates)[1];
         });
+
+      // 新しいプロジェクションで拠点のラベル位置を計算し直す
+      svg.selectAll('.sitesname')
+        .attr('x', function(d) {
+          return projection(d.geometry.coordinates)[0] + 6;
+        })
+        .attr('y', function(d) {
+          return projection(d.geometry.coordinates)[1];
+        })
+        .attr('dy', '.35em');
     }
 
-    // 選択した県
+    // クリックで選択した県
     var activePrefecture = d3.select(null);
 
+    // 県の境界線にあわせてズームする
     function zoomToBound(d) {
       // プロジェクション関数を初期状態に戻す
       initProjection();
@@ -419,6 +426,25 @@
           );
 
         sitesAll
+          .exit()
+          .remove();
+
+        var sitesnameAll = container.select('.siteLayer').selectAll('.sitesname').data(_data.features);
+        sitesnameAll
+          .enter()
+          .append('text')
+          .classed('sitesname', true)
+          .merge(sitesnameAll)
+          .text(function(d) {
+            return d.properties.city;
+          })
+          .attr('x', function(d) {
+            return projection(d.geometry.coordinates)[0] + 6;
+          })
+          .attr('y', function(d) {
+            return projection(d.geometry.coordinates)[1];
+          })
+          .attr('dy', '.35em')
           .exit()
           .remove();
 
