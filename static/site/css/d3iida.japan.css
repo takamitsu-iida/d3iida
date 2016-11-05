@@ -23,7 +23,7 @@
 .sitesname {
   font-size          : 8pt;
   color              : black;
-  font-size          : 8px;
+  fill               : black;
 }
 
 .sites {

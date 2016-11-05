@@ -1,5 +1,5 @@
 d3
- version 4.2.8
+ version 4.3.0
  https://github.com/d3/d3/releases
 
 topojson
