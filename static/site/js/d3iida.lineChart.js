@@ -4,7 +4,7 @@
 // Takamitsu IIDA
 // takamitsu.iida@gmail.com
 
-// 棒グラフモジュール
+// ライングラフモジュール
 (function() {
   d3iida.lineChart = function module() {
     // SVGの枠の大きさ
@@ -248,7 +248,7 @@
     return exports;
   };
 
-  // 使い方  <div id='lineChart'></div>内に棒グラフを描画する
+  // 使い方  <div id='lineChart'></div>内にグラフを描画する
   d3iida.lineChart.example = function() {
     var n = 40;
     var random = d3.randomNormal(0, .2);
