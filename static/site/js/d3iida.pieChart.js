@@ -4,7 +4,7 @@
 // Takamitsu IIDA
 // takamitsu.iida@gmail.com
 
-// 棒グラフモジュール
+// パイチャートモジュール
 (function() {
   d3iida.pieChart = function module() {
     // SVGの枠の大きさ
@@ -181,7 +181,7 @@
     return exports;
   };
 
-  // 使い方  <div id='pieChart'></div>内に棒グラフを描画する
+  // 使い方  <div id='pieChart'></div>内にグラフを描画する
   d3iida.pieChart.example = function() {
     var n = 4;
     var random = d3.randomUniform(1, 5);
