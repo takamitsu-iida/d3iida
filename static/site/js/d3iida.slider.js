@@ -219,7 +219,7 @@
 
     // 頻繁に'hue'イベントを発火させると重たいのでdebounce処理を加える
     var debounceTimer;
-    var debounceInterval = 50;
+    var debounceInterval = 30;
     function callEvent(eventname, context, data) {
       // 最後に呼ばれた時の値を使うために、この関数のインスタンスに保存しておく
       this.eventname = eventname;
@@ -314,6 +314,14 @@
         return duration;
       }
       duration = _;
+      return this;
+    };
+
+    exports.debounceInterval = function(_) {
+      if (!arguments.length) {
+        return debounceInterval;
+      }
+      debounceInterval = _;
       return this;
     };
 

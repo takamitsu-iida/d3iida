@@ -39,7 +39,7 @@
       .y(function(d, i) {
         return yScale(d);
       })
-      .curve(d3.curveBasisOpen);
+      .curve(d3.curveNatural); // d3.curveBasisOpen
 
     // X軸に付与するグリッドライン（Y軸と平行のグリッド線）
     var drawXGrid = false;

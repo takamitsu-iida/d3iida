@@ -92,29 +92,31 @@ strong {
   stroke-width: 1.5px;
 }
 
-.slider-chart-area {
+/* sliderChart */
+
+.sc-chart-area {
   fill: steelblue;
   opacity: 0.5;
 }
 
-.slider-chart-line {
+.sc-chart-line {
   fill: none;
   stroke: steelblue;
   stroke-width: 1.5px;
 }
 
-.slider-chart-timeline {
+.sc-chart-timeline {
   fill: none;
   stroke: gray;
   stroke-width: 1.0px;
+  shape-rendering: crispEdges;
 }
 
-.slider-chart-tcircle {
+.sc-chart-tcircle {
   fill: blue;
   stroke: white;
   stroke-width: 1.0px;
 }
-
 
 /* multiLineChart */
 

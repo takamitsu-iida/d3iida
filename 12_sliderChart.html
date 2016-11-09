@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <!-- IE9以降で正しく機能するようにする -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <title>d3iida.js</title>
+
+  <!-- d3.js v4をインクルード -->
+  <script src="./static/d3.4.3.0/d3.min.js"></script>
+
+  <!-- スタイルシート -->
+  <link rel="stylesheet" href="./static/site/css/d3iida.css" type="text/css">
+  <link rel="stylesheet" href="./static/site/css/d3iida.slider.css" type="text/css">
+
+  <!-- d3iidaをインクルード -->
+  <script src="./static/site/js/d3iida.startup.js"></script>
+  <script src="./static/site/js/d3iida.slider.js"></script>
+  <script src="./static/site/js/d3iida.sliderChart.js"></script>
+
+</head>
+
+<body>
+
+  <h1>スライダ付きラインチャート</h1>
+  <p>
+    ラインチャートに時間と共に移動する縦線を追加しています。
+  </p>
+  <div class="chartContainer">
+    <div id="sliderChart"></div>
+  </div>
+
+  <script>
+    d3iida.sliderChart.example();
+  </script>
+
+</body>
+
+</html>

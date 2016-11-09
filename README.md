@@ -82,6 +82,14 @@ d3.select('#hello').datum(dataset).call(hello);
 [ライブデモ](https://sites.google.com/site/d3iidademo/11_multilinechart)
 
 
+## 12_sliderChart.html
+
+応用編です。
+スライダー付きのライン＋エリア・チャートです。
+
+[ライブデモ](https://sites.google.com/site/d3iidademo/12_sliderchart)
+
+
 ## 20_mapChart.html
 
 日本地図の上に県庁所在地をプロットしたものです。
