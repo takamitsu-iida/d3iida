@@ -85,7 +85,8 @@
 
       // イベントで変更を通知
       // console.log(hueActual);
-      dispatch.call('hue', this, hueActual);
+      // dispatch.call('hue', this, hueActual);
+      callEvent('hue', this, hueActual);
     }
 
     var xTicks = {
@@ -216,6 +217,21 @@
       //
     }
 
+    // 頻繁に'hue'イベントを発火させると重たいのでdebounce処理を加える
+    var debounceTimer;
+    var debounceInterval = 50;
+    function callEvent(eventname, context, data) {
+      // 最後に呼ばれた時の値を使うために、この関数のインスタンスに保存しておく
+      this.eventname = eventname;
+      this.context = context;
+      this.data = data;
+      debounceTimer = debounceTimer || window.setTimeout(function() {
+        debounceTimer = null;
+        // イベントを発行する
+        dispatch.call(this.eventname, this.context, this.data);
+      }, debounceInterval);
+    }
+
     function pause() {
       // スライダーに仕込んでいるトランジションが動いているなら、それを停止して、処理完了
       if (slider.node().__transition) {
@@ -254,7 +270,8 @@
               ssbutton.text('開始');
             }
             handle.attr('cx', xScale(hueActual));
-            dispatch.call('hue', this, hueActual);
+            // dispatch.call('hue', this, hueActual);
+            callEvent('hue', this, hueActual);
           };
         });
 
