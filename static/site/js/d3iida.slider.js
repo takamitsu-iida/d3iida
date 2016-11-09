@@ -1,9 +1,13 @@
 /* global d3, d3iida */
 
+// 2016.11.09
+// Takamitsu IIDA
+// takamitsu.iida@gmail.com
+
 // Smooth Slider
 // by Mike Bostock
 // https://bl.ocks.org/mbostock/6499018
-
+//
 // 上記を参考にして作成したボタン付きスライダモジュール
 // スタイル指定をしているのでCSSファイル必須
 // モジュールの中に組み込むパーツ素材として使うことを想定しているのでsvgは作らない
@@ -11,6 +15,32 @@
 (function() {
   //
   d3iida.slider = function module(_accessor) {
+    //
+    // クラス名定義
+    // CSSファイルも見ること
+    //
+
+    // ボタンを配置するコンテナ
+    var CLASS_BUTTON_CONTAINER = 'sl-button-container';
+
+    // スライダを配置するコンテナ
+    var CLASS_SLIDER_CONTAINER = 'sl-slider-container';
+
+    // マウスイベントを仕込む背景
+    var CLASS_TRACK_BACKGROUND = 'sl-slider-track-background';
+
+    // 境界
+    var CLASS_TRACK_OUTLINE = 'sl-slider-track-outline';
+
+    // 内側の塗りつぶし
+    var CLASS_TRACK_INSET = 'sl-slider-track-inset';
+
+    // startとendの表示
+    var CLASS_SLIDER_TICKS = 'sl-slider-ticks';
+
+    // 丸
+    var CLASS_SLIDER_HANDLE = 'sl-slider-handle';
+
     // ボタン設置場所へのマージン
     var buttonMargin = {
       top: 40,
@@ -115,23 +145,23 @@
       container = _selection;
 
       // ボタンを配置するコンテナ 'g' を作ってcall()する
-      var ssbuttonContainerAll = container.selectAll('.ssbuttonContainer').data(['dummy']);
+      var ssbuttonContainerAll = container.selectAll('.' + CLASS_BUTTON_CONTAINER).data(['dummy']);
       ssbuttonContainerAll
         .enter()
         .append('g')
-        .classed('ssbuttonContainer', true)
+        .classed(CLASS_BUTTON_CONTAINER, true)
         // ENTER + UPDATE領域
         .merge(ssbuttonContainerAll)
         .attr('transform', 'translate(' + buttonMargin.left + ',' + buttonMargin.top + ')')
         .call(ssbutton);
 
       // スライダを配置するコンテナ 'g' を作って'sliderContainer'クラスを付与する
-      var sliderContainerAll = container.selectAll('.sliderContainer').data(['dummy']);
+      var sliderContainerAll = container.selectAll('.' + CLASS_SLIDER_CONTAINER).data(['dummy']);
       slider = sliderContainerAll
         // ENTER領域
         .enter()
         .append('g')
-        .classed('sliderContainer', true)
+        .classed(CLASS_SLIDER_CONTAINER, true)
         .merge(sliderContainerAll)
         // ENTER + UPDATE領域
         .attr('transform', 'translate(' + sliderMargin.left + ',' + sliderMargin.top + ')');
@@ -140,11 +170,11 @@
 
       // 一番下は太さ50pxの極太ライン(rectでもいいけど、ラインの方が指定するポイントが少なくてすむ)
       // ドラッグイベントを処理する
-      var sliderTrackBackgroundAll = slider.selectAll('.slider-track-background').data(['dummy']);
+      var sliderTrackBackgroundAll = slider.selectAll('.' + CLASS_TRACK_BACKGROUND).data(['dummy']);
       sliderTrackBackgroundAll
         .enter()
         .append('line')
-        .classed('slider-track-background', true)
+        .classed(CLASS_TRACK_BACKGROUND, true)
         .merge(sliderTrackBackgroundAll)
         .attr('x1', xScale.range()[0])
         .attr('x2', xScale.range()[1])
@@ -153,39 +183,39 @@
         .call(drag);
 
       // 次に置くのは輪郭になる太さ10pxのライン
-      var sliderTrackOutlineAll = slider.selectAll('.slider-track-outline').data(['dummy']);
+      var sliderTrackOutlineAll = slider.selectAll('.' + CLASS_TRACK_OUTLINE).data(['dummy']);
       sliderTrackOutlineAll
         .enter()
         .append('line')
-        .classed('slider-track-outline', true)
+        .classed(CLASS_TRACK_OUTLINE, true)
         .merge(sliderTrackOutlineAll)
         .attr('x1', xScale.range()[0])
         .attr('x2', xScale.range()[1]);
 
       // 次に置くのは内側を塗りつぶす太さ8pxのライン
-      var sliderTrackInsetAll = slider.selectAll('.slider-track-inset').data(['dummy']);
+      var sliderTrackInsetAll = slider.selectAll('.' + CLASS_TRACK_INSET).data(['dummy']);
       sliderTrackInsetAll
         .enter()
         .append('line')
-        .classed('slider-track-inset', true)
+        .classed(CLASS_TRACK_INSET, true)
         .merge(sliderTrackInsetAll)
         .attr('x1', xScale.range()[0])
         .attr('x2', xScale.range()[1]);
 
       // 目盛を表示する領域'g'を追加
       // スライダよりも18pxだけ下に下げる
-      var ticksAll = slider.selectAll('.slider-ticks').data(['dummy']);
+      var ticksAll = slider.selectAll('.' + CLASS_SLIDER_TICKS).data(['dummy']);
       ticksAll
         // ENTER領域
         .enter()
         .append('g')
-        .classed('slider-ticks', true)
+        .classed(CLASS_SLIDER_TICKS, true)
         // ENTER + UPDATE領域
         .merge(ticksAll)
         .attr('transform', 'translate(0,' + 18 + ')');
 
       // 目盛になるテキスト
-      var ticksTextAll = container.select('.slider-ticks').selectAll('text').data(xScale.ticks(1));
+      var ticksTextAll = container.select('.' + CLASS_SLIDER_TICKS).selectAll('text').data(xScale.ticks(1));
       ticksTextAll
         // ENTER領域
         .enter()
@@ -205,11 +235,11 @@
         .remove();
 
       // ハンドルを追加する
-      var handleAll = slider.selectAll('.slider-handle').data(['dummy']);
+      var handleAll = slider.selectAll('.' + CLASS_SLIDER_HANDLE).data(['dummy']);
       handle = handleAll
         .enter()
         .append('circle')
-        .classed('slider-handle', true)
+        .classed(CLASS_SLIDER_HANDLE, true)
         .merge(handleAll)
         .attr('r', 9)
         .attr('cx', xScale(minValue));
@@ -339,6 +369,9 @@
 
   // svgの簡易ボタンモジュール
   d3iida.ssbutton = function module(_accessor) {
+    var CLASS_BUTTON_RECT = 'sl-ssbutton';
+    var CLASS_BUTTON_TEXT = 'sl-ssbutton-text';
+
     // 表示テキスト
     var text = '開始';
 
@@ -359,11 +392,11 @@
       container = _selection;
 
       // コンテナにテキストをのせる
-      var ssbuttonTextAll = container.selectAll('.ssbuttonText').data(['dummy']);
+      var ssbuttonTextAll = container.selectAll('.' + CLASS_BUTTON_TEXT).data(['dummy']);
       var ssbuttonText = ssbuttonTextAll
         .enter()
         .append('text')
-        .classed('ssbuttonText', true)
+        .classed(CLASS_BUTTON_TEXT, true)
         .merge(ssbuttonTextAll)
         .text(text);
 
@@ -371,11 +404,11 @@
       var bbox = ssbuttonText.node().getBBox();
 
       // ボタンとなる'rectをテキストの前に挿入する
-      var ssbuttonAll = container.selectAll('.ssbutton').data(['dummy']);
+      var ssbuttonAll = container.selectAll('.' + CLASS_BUTTON_RECT).data(['dummy']);
       ssbuttonAll
         .enter()
-        .insert('rect', '.ssbuttonText')
-        .classed('ssbutton', true)
+        .insert('rect', '.' + CLASS_BUTTON_TEXT)
+        .classed(CLASS_BUTTON_RECT, true)
         .on('click', function(d) {
           dispatch.call('click', this, d);
         })
@@ -396,7 +429,7 @@
       }
       text = _;
       if (container) {
-        container.select('.ssbuttonText').text(text);
+        container.select('.' + CLASS_BUTTON_TEXT).text(text);
       }
       return this;
     };
