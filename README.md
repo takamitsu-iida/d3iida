@@ -67,6 +67,13 @@ d3.select('#hello').datum(dataset).call(hello);
 [ライブデモ](https://sites.google.com/site/d3iidademo/05_radiobutton)
 
 
+## 06_slider.html
+
+スライダにボタンを付けたものです。組み込み用です。
+
+[ライブデモ](https://sites.google.com/site/d3iidademo/06_slider)
+
+
 ## 11_multiLineChart.html
 
 応用編です。
