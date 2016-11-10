@@ -90,6 +90,17 @@ d3.select('#hello').datum(dataset).call(hello);
 [ライブデモ](https://sites.google.com/site/d3iidademo/12_sliderchart)
 
 
+## 13_tweenChart.html
+
+応用編です。
+スライダー付きのライン・チャートです。
+
+太郎君はsin(x)上を、花子さんはcos(x)上を同じ速度であるきます。
+二人はどこで出会うでしょうか。
+
+[答えはこちら](https://sites.google.com/site/d3iidademo/13_tweenchart)
+
+
 ## 20_mapChart.html
 
 日本地図の上に県庁所在地をプロットしたものです。

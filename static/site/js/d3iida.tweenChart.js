@@ -4,36 +4,35 @@
 // Takamitsu IIDA
 // takamitsu.iida@gmail.com
 
-// スライダ付きラインモジュール
+// 破線を工夫してニョロニョロ動いているようにみせるチャート
 (function() {
-  d3iida.sliderChart = function module(_accessor) {
+  d3iida.tweenChart = function module(_accessor) {
     // svgを作る必要があるならインスタンス化するときにtrueを渡す
     // 例： var chart = sliderChart(true);
     var needsvg = arguments.length ? _accessor : false;
-
-    // call()時に渡されたデータ
-    var data;
 
     //
     // クラス名定義
     //
 
     // 一番下のレイヤ
-    var CLASS_BASE_LAYER = 'sc-base-layer';
+    var CLASS_BASE_LAYER = 'tc-base-layer';
 
     // スライダモジュールを配置するレイヤ
-    var CLASS_SLIDER_LAYER = 'sc-slider-layer';
+    var CLASS_SLIDER_LAYER = 'tc-slider-layer';
 
     // チャートを配置するレイヤ
-    var CLASS_CHART_LAYER = 'sc-chart-layer';
+    var CLASS_CHART_LAYER = 'tc-chart-layer';
 
-    // チャートのラインとエリア
-    var CLASS_CHART_LINE = 'sc-chart-line'; // CSSでスタイル指定
-    var CLASS_CHART_AREA = 'sc-chart-area'; // CSSでスタイル指定
+    // チャートにおけるライン、sinとcos
+    var CLASS_CHART_SLINE = 'tc-chart-sline'; // CSSでスタイル指定
+    var CLASS_CHART_SLINE2 = 'tc-chart-sline2'; // CSSでスタイル指定
+    var CLASS_CHART_CLINE = 'tc-chart-cline'; // CSSでスタイル指定
+    var CLASS_CHART_CLINE2 = 'tc-chart-cline2'; // CSSでスタイル指定
 
-    // タイムライン表示の縦線と丸
-    var CLASS_TIMELINE = 'sc-chart-timeline'; // CSSでスタイル指定
-    var CLASS_TCIRCLE = 'sc-chart-tcircle'; // CSSでスタイル指定
+    // チャートにおけるマーカー、sinとcos
+    var CLASS_CHART_SMARKER = 'tc-chart-smarker';
+    var CLASS_CHART_CMARKER = 'tc-chart-cmarker';
 
     // 外枠の大きさ
     var width = 420;
@@ -52,41 +51,60 @@
     var w = width - margin.left - margin.right;
     var h = height - margin.top - margin.bottom;
 
-    // スケール関数とレンジ指定
+    // スケール関数と出力レンジ指定
     var xScale = d3.scaleLinear().range([0, w]);
     var yScale = d3.scaleLinear().range([h, 0]);
 
-    // ドメイン指定は、データ入手後に行う
-    var xdomain;
-    var ydomain;
+    // 入力ドメイン指定は、データ入手後にsetDomain()を呼び出す
+    var xdomain; // = [0, 99];
+    var ydomain; // = [-1, 1];
 
-    // データの最小値・最大値を調べて入力ドメインを設定する
+    // 複数のデータを配列で受け取ることを前提に最小値・最大値を割り出す
     function setDomain(data) {
       if (!xdomain) {
         // データの[最小値, 最大値]の配列
-        var xextent = d3.extent(data, function(d) {
-          return d[0];
-        });
+        var xextent = [
+          // 各データの最小値を集めて、それの最小値を得る
+          d3.min(data, function(d) {
+            return d3.min(d, function(v) {
+              return v[0]; // [x, y]のデータを想定 xは0番目
+            });
+          }),
+          d3.max(data, function(d) {
+            return d3.max(d, function(v) {
+              return v[0]; // [x, y]のデータを想定 xは0番目
+            });
+          })
+        ];
         xScale.domain(xextent);
       }
       if (!ydomain) {
-        var yextent = d3.extent(data, function(d) {
-          return d[1];
-        });
+        var yextent = [
+          d3.min(data, function(d) {
+            return d3.min(d, function(v) {
+              return v[1]; // [x, y]のデータを想定 yは1番目
+            });
+          }),
+          d3.max(data, function(d) {
+            return d3.max(d, function(v) {
+              return v[1]; // [x, y]のデータを想定 yは1番目
+            });
+          })
+        ];
         yScale.domain(yextent);
       }
     }
 
     // 軸に付与するticksパラメータ
-    var xticks;
+    var xticks = 0;
     var yticks;
 
     // 軸のテキスト
-    var xAxisText = '時刻';
-    var yAxisText = '潮位(cm)';
+    var xAxisText = '';
+    var yAxisText = '';
 
     // X軸
-    var xaxis = d3.axisBottom(xScale); // .ticks(xticks);
+    var xaxis = d3.axisBottom(xScale).ticks(xticks);
 
     // Y軸
     var yaxis = d3.axisLeft(yScale); // .ticks(yticks);
@@ -107,17 +125,25 @@
     var line = d3.line().curve(d3.curveNatural);
 
     // ライン用のパスジェネレータで出力されたパス
-    // タイムラインとの交点を探るのに必要
-    var linePath;
+    var spath2;
+    var cpath2;
 
-    // 塗りつぶしエリアのパスジェネレータ
-    var area = d3.area().curve(d3.curveNatural);
+    // パスの長さ
+    var spathLength;
+    var cpathLength;
+
+    // interpolateString関数
+    var spathInterpolateString; //  = d3.interpolateString('0,' + l, l + ',' + l);
+    var cpathInterpolateString; //  = d3.interpolateString('0,' + l, l + ',' + l);
+
+    // マーカーの'circle'
+    var smarker;
+    var cmarker;
 
     // パスジェネレータにスケールを適用する関数
     // データは [[0, 107], [1, 102],
     // という構造を想定しているので、x軸はd[0]、y軸はd[1]になる
     function setScale() {
-      // ライン用パスジェネレータにスケールを適用する
       line
         .x(function(d) {
           return xScale(d[0]);
@@ -125,25 +151,14 @@
         .y(function(d) {
           return yScale(d[1]);
         });
-
-      // エリア用パスジェネレータにスケールを適用する
-      area
-        .x(function(d) {
-          return xScale(d[0]);
-        })
-        .y0(h)
-        .y1(function(d) {
-          return yScale(d[1]);
-        });
       //
     }
 
-    // 実際にパスジェネレータにスケールを適用するのは
-    // データ入手後に軸のドメインを決めて、スケールを作り直してから
-    // setScale();
-
     // レイヤにチャートを描画する
     function drawChart(layer, data) {
+      var d0 = data[0];
+      var d1 = data[1];
+
       // チャート描画領域'g'を追加
       var sliderChartAll = layer.selectAll('.' + CLASS_CHART_LAYER).data(['dummy']);
       var sliderChart = sliderChartAll
@@ -166,7 +181,7 @@
         .classed('x-axis', true)
         // ENTER + UPDATE領域
         .merge(xAxisAll)
-        .attr('transform', 'translate(0,' + h + ')')
+        .attr('transform', 'translate(0,' + h / 2 + ')')
         .call(xaxis);
 
       // X軸のラベルを追加
@@ -233,168 +248,74 @@
           .classed('y-grid', true)
           .merge(yGridAll)
           .call(make_y_gridlines().tickSize(-w).tickFormat(''));
-
-        // グラフを表示
-        var pathGAll = sliderChart.selectAll('.pathG').data(['dummy']);
-        var pathG = pathGAll
-          // ENTER領域
-          .enter()
-          .append('g')
-          .classed('pathG', true)
-          .merge(pathGAll)
-          .attr('width', w)
-          .attr('height', h);
-
-        var sliderChartAreaAll = pathG.selectAll('.' + CLASS_CHART_AREA).data(['dummy']);
-        sliderChartAreaAll
-          .enter()
-          .append('path')
-          .classed(CLASS_CHART_AREA, true)
-          .merge(sliderChartAreaAll)
-          .datum(data)
-          .attr('d', area);
-
-        var sliderChartLineAll = pathG.selectAll('.' + CLASS_CHART_LINE).data(['dummy']);
-        linePath = sliderChartLineAll
-          .enter()
-          .append('path')
-          .classed(CLASS_CHART_LINE, true)
-          .merge(sliderChartLineAll)
-          .datum(data)
-          .attr('d', line);
-        //
-
-        // 作成したレイヤを返却する
-        return sliderChart;
       }
-    }
 
-    //
-    // タイムラインをセットアップする
-    //
+      // グラフを表示
+      var pathGAll = sliderChart.selectAll('.pathG').data(['dummy']);
+      var pathG = pathGAll
+        // ENTER領域
+        .enter()
+        .append('g')
+        .classed('pathG', true)
+        .merge(pathGAll)
+        .attr('width', w)
+        .attr('height', h);
 
-    // 入力ドメイン i=0～1 として、出力レンジを実際の時刻に変換するスケールを作成する
-    // 例えば、0を指定したときが7時、1を指定したときが14時、というようにする
-    var trange = [7, 14];
-    var iScale = d3.scaleLinear()
-      .domain([0, 1])
-      .range(trange); // [7, 14]
-
-    // さらに、その時刻をX座標に変換するスケールを作るのだが
-    // この時点ではxScaleのドメインがまだ設定されていないので、
-    // インスタンス変数だけ定義して後から設定する
-    var tScale; // = function(i) { return xScale(iScale(i)); };
-
-    // タイムライン用のパスジェネレータ
-    var tline = d3.line()
-      .x(function(d) {
-        return d[0];
-      })
-      .y(function(d) {
-        return d[1];
-      });
-
-    // タイムライン用のパスジェネレータで生成された縦線のパス
-    var tpath;
-
-    // タイムラインの交点に配置する'circle'のセレクタ
-    var tcircle;
-
-    // タイムラインを追加する
-    function drawTimeline(sliderChart) {
-      // 初期値
-      var t = 0.0;
-      var tx1 = tScale(t);
-      var ty1 = 0;
-      var tx2 = tScale(t);
-      var ty2 = h;
-      var tdata = [[tx1, ty1], [tx2, ty2]];
-
-      var sliderChartTimelineAll = sliderChart.selectAll('.' + CLASS_TIMELINE).data(['dummy']);
-      tpath = sliderChartTimelineAll
+      var slineAll = pathG.selectAll('.' + CLASS_CHART_SLINE).data(['dummy']);
+      slineAll
         .enter()
         .append('path')
-        .classed(CLASS_TIMELINE, true)
-        .merge(sliderChartTimelineAll)
-        .attr('d', tline(tdata));
+        .classed(CLASS_CHART_SLINE, true)
+        .merge(slineAll)
+        .datum(d0)
+        .attr('d', line);
 
-      var tcircleAll = sliderChart.selectAll('.' + CLASS_TCIRCLE).data(['dummy']);
-      tcircle = tcircleAll
+      var sline2All = pathG.selectAll('.' + CLASS_CHART_SLINE2).data(['dummy']);
+      spath2 = sline2All
         .enter()
-        .append('circle')
-        .classed(CLASS_TCIRCLE, true)
-        .merge(tcircleAll)
-        .attr('cx', 0)
-        .attr('cy', 0)
-        .attr('r', '6');
+        .append('path')
+        .classed(CLASS_CHART_SLINE2, true)
+        .merge(sline2All)
+        .datum(d0)
+        .attr('d', line)
+        .attr('stroke-dashoffset', 0);
 
-      // 0すなわち7時のところに線を引く。あとはこれを移動する。
-      setTimeline(0);
-    }
+      var clineAll = pathG.selectAll('.' + CLASS_CHART_CLINE).data(['dummy']);
+      clineAll
+        .enter()
+        .append('path')
+        .classed(CLASS_CHART_CLINE, true)
+        .merge(clineAll)
+        .datum(d1)
+        .attr('d', line);
 
-    // ソートされた配列に対して近傍値のインデックスを返してくれる関数
-    var xbisector = d3.bisector(function(d) {
-      return d[0];
-    }).right;
-
-    // i=0～1を引数にして、時刻に応じた場所に縦線を移動する
-    function setTimeline(i) {
-      // X座標はtScale関数を通せば分かる
-      var x = tScale(i);
-
-      // 縦線をひくためのデータはこれでよい
-      var tdata = [[x, 0], [x, h]];
-
-      // そのデータをパスジェネレータに渡して、パスを移動する
-      tpath.attr('d', tline(tdata));
-
-      // その２を使う
-      var method = 2;
-
-      // ラインとの交点を探る方法・その１
-      // ラインのパスを先頭から徐々に移動してX座標がその場所になるまで探っていく方法
-      // accuracyは小さい方が正確だけどループから抜けるのに時間がかかる。
-      // ●の半径が6なので、その半分に収まればよいものとする
-      if (method === 1) {
-        var pathEl = linePath.node();
-        var pathLength = pathEl.getTotalLength();
-        var accuracy = 3;
-
-        var j;
-        var pos;
-        for (j = x; j < pathLength; j += accuracy) {
-          pos = pathEl.getPointAtLength(j);
-          if (pos.x >= x) {
-            break;
-          }
-        }
-
-        tcircle.attr('cx', x).attr('cy', pos.y);
-      }
-
-      // ラインとの交点を探る方法・その２
-      // 近傍のデータで補完する
-      if (method === 2) {
-        // 時刻
-        var t = iScale(i);
-        var index = xbisector(data, t);
-        var startDatum = data[index - 1];
-        var endDatum = data[index];
-        var interpolate = d3.interpolateNumber(startDatum[1], endDatum[1]);
-        var range = endDatum[0] - startDatum[0];
-        var valueY = interpolate((t % range) / range);
-        var y = yScale(valueY);
-
-        tcircle.attr('cx', x).attr('cy', y);
-      }
-
+      var cline2All = pathG.selectAll('.' + CLASS_CHART_CLINE2).data(['dummy']);
+      cpath2 = cline2All
+        .enter()
+        .append('path')
+        .classed(CLASS_CHART_CLINE2, true)
+        .merge(cline2All)
+        .datum(d1)
+        .attr('d', line)
+        .attr('stroke-dashoffset', 0);
       //
+
+      // パスの全長
+      var l;
+      spathLength = l = spath2.node().getTotalLength();
+      spathInterpolateString = d3.interpolateString('0,' + l, l + ',' + l);
+
+      cpathLength = l = cpath2.node().getTotalLength();
+      cpathInterpolateString = d3.interpolateString('0,' + l, l + ',' + l);
+
+      // 作成したレイヤを返却する
+      return sliderChart;
     }
 
     // スライダモジュールをインスタンス化する
-    // 'hue' イベントを拾ってタイムラインを移動する
+    // 'hue' イベントを拾ってマーカーを移動する
     var slider = d3iida.slider().on('hue', function(d) {
-      setTimeline(d);
+      setMarkerPosition(d);
     });
 
     function drawSlider(layer) {
@@ -414,10 +335,75 @@
       return sliderLayer;
     }
 
+    // マーカーの●を作る
+    function drawMarker(layer) {
+      var smarkerAll = layer.selectAll('.' + CLASS_CHART_SMARKER).data(['dummy']);
+      smarker = smarkerAll
+        .enter()
+        .append('circle')
+        .classed(CLASS_CHART_SMARKER, true)
+        .merge(smarkerAll)
+        .attr('r', 5)
+        .attr('fill', 'purple');
+
+      var cmarkerAll = layer.selectAll('.' + CLASS_CHART_CMARKER).data(['dummy']);
+      cmarker = cmarkerAll
+        .enter()
+        .append('circle')
+        .classed(CLASS_CHART_CMARKER, true)
+        .merge(smarkerAll)
+        .attr('r', 5)
+        .attr('fill', 'purple');
+      //
+    }
+
+    function setMarkerPosition(t) {
+      var sda;
+      sda = getStrokeDashArray(t, spathInterpolateString);
+      spath2.attr('stroke-dasharray', sda);
+
+      sda = getStrokeDashArray(t, cpathInterpolateString);
+      cpath2.attr('stroke-dasharray', sda);
+
+      // マーカーを先頭に移動
+      var p;
+      p = spath2.node().getPointAtLength(t * spathLength);
+      smarker
+        .attr('cx', p.x)
+        .attr('cy', p.y);
+
+      p = cpath2.node().getPointAtLength(t * cpathLength);
+      cmarker
+        .attr('cx', p.x)
+        .attr('cy', p.y);
+
+      //
+    }
+
+    // 破線の描画を工夫する。引数は0～1の間の数字。
+    function getStrokeDashArray(t, i) {
+      // interpolateString iは端点を指定するとその間を補完してくれる関数を作成してくれる。
+      // 中間点tを指定してi(t)を呼び出すと、中間点の長さ, トータル長、を得る。
+
+      var drawlen = 60;
+      var cols = i(t).split(','); // 文字列なのでコンマでスプリット。cols[0]が中間点、colos[1]が終点
+      var result;
+      if (cols[0] < drawlen) {
+        result = i(t);
+      } else {
+        var hidden = cols[0] - drawlen;
+        result = '0,' + hidden + ',' + drawlen + ',' + cols[1];
+        // 書く、書かない、書く、書かない、の順に指定
+      }
+      // console.log(result);
+
+      // 出発点から描画するなら単純にi(t)を戻せばよいが、ここでは破線のデータを返す
+      return result;
+    }
+
     // call()されたときに呼ばれる公開関数
     function exports(_selection) {
       _selection.each(function(_data) {
-        data = _data;
         var container = _selection;
 
         if (!_data) {
@@ -429,14 +415,8 @@
         // 受け取ったデータで入力ドメインを設定
         setDomain(_data);
 
-        // 変更したスケールをパスジェネレータに適用する
+        // スケール関数の変更をパスジェネレータに反映する
         setScale();
-
-        // 変更したスケールをタイムライン用のスケール関数に適用する
-        // tScaleはi=0~1の入力に対してX座標に変換する
-        tScale = function(i) {
-          return xScale(iScale(i));
-        };
 
         // svgの作成を必要とするなら、新たにsvgを作成して、それをコンテナにする
         if (needsvg) {
@@ -450,25 +430,25 @@
         }
 
         // コンテナに直接描画するのは気がひけるので、レイヤを１枚追加する
-        var layerAll = container.selectAll('.' + CLASS_BASE_LAYER).data(['dummy']);
-        var layer = layerAll
+        var blayerAll = container.selectAll('.' + CLASS_BASE_LAYER).data(['dummy']);
+        var blayer = blayerAll
           // ENTER領域
           .enter()
           .append('g')
           .classed(CLASS_BASE_LAYER, true)
           // ENTER + UPDATE領域
-          .merge(layerAll)
+          .merge(blayerAll)
           .attr('width', width)
           .attr('height', height);
 
-        // レイヤにスライダを配置する
-        drawSlider(layer);
+        // ベースレイヤにスライダを配置する
+        drawSlider(blayer);
 
-        // レイヤにチャートを配置する
-        var clayer = drawChart(layer, _data);
+        // ベースレイヤにチャートを配置する
+        var clayer = drawChart(blayer, _data);
 
-        // チャートのレイヤ上にタイムラインを追加する
-        drawTimeline(clayer);
+        // チャートレイヤにマーカーを配置する
+        drawMarker(clayer);
 
         //
       });
@@ -556,60 +536,31 @@
       return this;
     };
 
-    exports.trange = function(_) {
-      if (!arguments.length) {
-        return trange;
-      }
-      trange = _;
-      iScale.range(trange);
-      return this;
-    };
-
     return exports;
   };
 
   // 使い方  <div id='sliderChart'></div>内にグラフを描画する
-  d3iida.sliderChart.example = function() {
+  d3iida.tweenChart.example = function() {
     // データを用意する
 
-    // 公開されている潮位のテキストデータを使う
-    // http://www.data.jma.go.jp/kaiyou/db/tide/suisan/index.php
-    var text = ' 50 69 96124145156152136112 85 64 54 57 74 98124145155151134108 79 54 401610 2Z1 5151561713155999999999999991115 532329 3899999999999999';
+    var d0 = d3.range(0, Math.PI * 3).map(function(i) {
+      return [i, Math.sin(i)];
+    });
 
-    var tideDatas = [];
-    var m;
-    for (m = 0; m < 24; m++) {
-      var str = text.substr(m * 3, 3);
-      var num = parseInt(str, 10) || 0;
-      tideDatas.push([m, num]);
-    }
+    var d1 = d3.range(0, Math.PI * 3).map(function(i) {
+      return [i, Math.cos(i)];
+    });
 
-    // この処理でtideDatas配列は、[時刻, 潮位]の配列の配列になる
-    //  [[0, 107],
-    //   [1, 102],
-    //   [2, 96],
-
-    // console.log(tideDatas);
-
-    var chart = d3iida.sliderChart(true);
+    var chart = d3iida.tweenChart(true);
 
     // 大きめにする
     chart.width(600).height(400);
 
-    // 潮汐データの最小値と最大値はこんなものかな
-    chart.ydomain([-10, 150]);
-
-    // Y軸のticksを調整する
-    chart.yticks(5);
-
-    // タイムラインは6時~15時の情報に対して縦線を書く
-    chart.trange([6, 15]);
-
     // グラフのコンテナは<div id='sliderChar'>を使う
-    var container = d3.select('#sliderChart');
+    var container = d3.select('#tweenChart');
 
     // コンテナのセレクションにデータを紐付けてcall()する
-    container.datum(tideDatas).call(chart);
+    container.datum([d0, d1]).call(chart);
 
    //
   };

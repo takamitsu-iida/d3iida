@@ -86,6 +86,14 @@ strong {
   shape-rendering: crispEdges;
 }
 
+.grid path,
+.x-grid path,
+.y-grid path {
+  stroke: lightgrey;
+  stroke-opacity: 0.7;
+  shape-rendering: crispEdges;
+}
+
 .line {
   fill: none;
   stroke: steelblue;
@@ -116,6 +124,22 @@ strong {
   fill: blue;
   stroke: white;
   stroke-width: 1.0px;
+}
+
+/* tweenChart */
+
+.tc-chart-sline,
+.tc-chart-cline {
+  fill: none;
+  stroke: gray;
+  stroke-width: 0.4px;
+}
+
+.tc-chart-sline2,
+.tc-chart-cline2 {
+  fill: none;
+  stroke: purple;
+  stroke-width: 1.2px;
 }
 
 /* multiLineChart */

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <!-- IE9以降で正しく機能するようにする -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <title>d3iida.js</title>
+
+  <!-- d3.js v4をインクルード -->
+  <script src="./static/d3.4.3.0/d3.min.js"></script>
+
+  <!-- スタイルシート -->
+  <link rel="stylesheet" href="./static/site/css/d3iida.css" type="text/css">
+  <link rel="stylesheet" href="./static/site/css/d3iida.slider.css" type="text/css">
+
+  <!-- d3iidaをインクルード -->
+  <script src="./static/site/js/d3iida.startup.js"></script>
+  <script src="./static/site/js/d3iida.slider.js"></script>
+  <script src="./static/site/js/d3iida.tweenChart.js"></script>
+
+</head>
+
+<body>
+
+  <h1>パス上を移動する</h1>
+  <p>
+    スライダに従ってパス上を移動します。
+  </p>
+  <div class="chartContainer">
+    <div id="tweenChart"></div>
+  </div>
+
+  <script>
+    d3iida.tweenChart.example();
+  </script>
+
+</body>
+
+</html>
