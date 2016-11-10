@@ -2,6 +2,8 @@
 
 d3.jsがv4にバージョンアップした影響で昔作ったコードが動作しなくなったので、改めて作り直します。
 
+再利用可能な作例の保管庫です。
+
 
 ## 01_helloWorld.html
 
@@ -95,7 +97,7 @@ d3.select('#hello').datum(dataset).call(hello);
 応用編です。
 スライダー付きのライン・チャートです。
 
-太郎君はsin(x)上を、花子さんはcos(x)上を同じ速度であるきます。
+太郎君はsin(x)上を、花子さんはcos(x)上を同じ速度で歩きます。
 二人はどこで出会うでしょうか。
 
 [答えはこちら](https://sites.google.com/site/d3iidademo/13_tweenchart)
