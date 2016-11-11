@@ -2,7 +2,6 @@
 
 // 2016.11.02
 // Takamitsu IIDA
-// takamitsu.iida@gmail.com
 
 // 使い方
 // d3iida.simpleTable(function(row) {

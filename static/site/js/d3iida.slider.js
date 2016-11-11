@@ -2,7 +2,6 @@
 
 // 2016.11.09
 // Takamitsu IIDA
-// takamitsu.iida@gmail.com
 
 // Smooth Slider
 // by Mike Bostock

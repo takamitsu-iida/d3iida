@@ -2,7 +2,6 @@
 
 // 2016.11.03
 // Takamitsu IIDA
-// takamitsu.iida@gmail.com
 
 // ライングラフモジュール
 (function() {

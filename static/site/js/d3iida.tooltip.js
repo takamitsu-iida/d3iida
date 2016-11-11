@@ -2,7 +2,6 @@
 
 // 2016.11.03
 // Takamitsu IIDA
-// takamitsu.iida@gmail.com
 
 // tooltipモジュール
 // <body>直下にツールチップ表示用の<div>を追加する
