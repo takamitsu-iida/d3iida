@@ -290,9 +290,8 @@
     // call()されたときに呼ばれる公開関数
     //
     function exports(_selection) {
+      var container = _selection;
       _selection.each(function(_data) {
-        var container = _selection;
-
         // コンテナにnullを紐付けてcall()したら、全て削除
         if (!_data) {
           container.selectAll('div').remove();
@@ -349,7 +348,7 @@
         // 特に pointer-events:を指定するかどうかで、マウスイベントを拾うかどうかを制御している
 
         // ズーム動作をリセットするための'rect'を追加する
-        var resetRectAll = container.select('svg').selectAll('.resetRect').data(['dummy']);
+        var resetRectAll = svg.selectAll('.resetRect').data(['dummy']);
         resetRectAll
           .enter()
           .append('rect')
@@ -362,7 +361,7 @@
           .attr('height', height);
 
         // 地図を描画するレイヤ 'g'
-        var mapLayerAll = container.select('svg').selectAll('.mapLayer').data(['dummy']);
+        var mapLayerAll = svg.selectAll('.mapLayer').data(['dummy']);
         mapLayerAll
           .enter()
           .append('g')
@@ -393,8 +392,8 @@
           });
 
         // サイトを描画するレイヤ
-        var siteLayerAll = container.select('svg').selectAll('.siteLayer').data(['dummy']);
-        siteLayerAll
+        var siteLayerAll = svg.selectAll('.siteLayer').data(['dummy']);
+        var siteLayer = siteLayerAll
           .enter()
           .append('g')
           .classed('siteLayer', true)
@@ -404,7 +403,7 @@
           .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
         // siteLayerに拠点を追加
-        var sitesAll = container.select('.siteLayer').selectAll('.sites').data(_data.features);
+        var sitesAll = siteLayer.selectAll('.sites').data(_data.features);
         sitesAll
           .enter()
           .append('circle')
@@ -429,7 +428,7 @@
           .exit()
           .remove();
 
-        var sitesnameAll = container.select('.siteLayer').selectAll('.sitesname').data(_data.features);
+        var sitesnameAll = siteLayer.selectAll('.sitesname').data(_data.features);
         sitesnameAll
           .enter()
           .append('text')
