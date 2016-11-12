@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- 【参考URL】https://github.com/prog-mitsu/runJsInGoogleSite -->
+
+<!-- https://sites.google.com/site/d3iidademo/static/site/07_vhover.xml -->
+<!-- サイズは横500ピクセル, 高さ500, webページとして作成し、ページ設定で添付ファイルの許可を外す(全部のチェックを外す) -->
+
+<Module>
+
+  <!-- ガジェット名 -->
+  <ModulePrefs title="d3iida" />
+
+  <Content type="html">
+    <![CDATA[
+
+      <!-- JSファイル -->
+      <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/d3-4-3-0/d3.min.js'></script>
+      <!-- <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/topojson-1-6-27/topojson.min.js'></script> -->
+      <!-- <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/crossfilter-1-3-12/crossfilter.min.js'></script> -->
+
+      <!-- d3iida -->
+      <link rel="stylesheet" type="text/css" href='//sites.google.com/site/d3iidademo/static/site/dist/d3iida.css'/>
+      <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/site/dist/d3iida-min.js'></script>
+
+      <h1>vhover</h1>
+      <p>
+        クリックもドラッグも不要、マウスオーバーだけでデータを選択します。組み込み用です。
+      </p>
+      <div class="chartContainer">
+      </div>
+
+      <script>
+        d3iida.vhover.example();
+      </script>
+
+    ]]>
+  </Content>
+</Module>

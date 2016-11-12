@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <!-- IE9以降で正しく機能するようにする -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <title>d3iida.js</title>
+
+  <!-- d3.js v4をインクルード -->
+  <script src="./static/d3.4.3.0/d3.min.js"></script>
+
+  <!-- スタイルシート -->
+  <link rel="stylesheet" href="./static/site/css/d3iida.css" type="text/css">
+  <link rel="stylesheet" href="./static/site/css/d3iida.vhover.css" type="text/css">
+
+  <!-- d3iida.jsをインクルード -->
+  <script src="./static/site/js/d3iida.startup.js"></script>
+  <script src="./static/site/js/d3iida.vhover.js"></script>
+
+</head>
+
+<body>
+
+  <h1>vhover</h1>
+  <p>
+    クリックもドラッグも不要、マウスオーバーだけでデータを選択します。組み込み用です。
+  </p>
+  <div class="chartContainer">
+  </div>
+
+  <script>
+    d3iida.vhover.example();
+  </script>
+
+</body>
+
+</html>

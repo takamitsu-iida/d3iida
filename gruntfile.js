@@ -18,6 +18,7 @@ module.exports = function (grunt) {
           'static/site/js/d3iida.radioButton.js',
           'static/site/js/d3iida.simpleTable.js',
           'static/site/js/d3iida.slider.js',
+          'static/site/js/d3iida.vhover.js',
           'static/site/js/d3iida.sliderChart.js',
           'static/site/js/d3iida.tweenChart.js',
           'static/site/js/d3iida.tooltip.js',
@@ -32,7 +33,8 @@ module.exports = function (grunt) {
         src: [
           'static/site/css/d3iida.css',
           'static/site/css/d3iida.japan.css',
-          'static/site/css/d3iida.slider.css'
+          'static/site/css/d3iida.slider.css',
+          'static/site/css/d3iida.vhover.css'
           ],
         dest: 'static/site/dist/d3iida.css'
       }

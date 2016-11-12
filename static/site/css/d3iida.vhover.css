@@ -1,0 +1,55 @@
+.vh-track-ticks {
+  font: 18px sans-serif;
+  fill:grey;
+  fill-opacity: 0.5;
+}
+
+.vh-track-outline,
+.vh-track-inset,
+.vh-track-background {
+  stroke-linecap: round;
+}
+
+/* not used */
+.vh-track-outline {
+  stroke: #000;
+  stroke-opacity: 0.3;
+  stroke-width: 10px;
+  pointer-events: none; /* do not handle mouse event */
+}
+
+.vh-track-inset {
+  stroke: #ddd;
+  stroke-width: 8px;
+  pointer-events: none; /* do not handle mouse event */
+}
+
+.vh-track-background {
+  /*stroke: gray;*/
+  /*stroke-opacity: 0.5;*/
+  stroke: none;
+  stroke-width: 60px;
+  cursor: ns-resize;
+  pointer-events: all; /* handle all mouse event */
+}
+
+.vh-track-circle {
+  fill: #ddd;
+  stroke: #ddd;
+  stroke-width: 4px;
+  pointer-events: none; /* do not handle mouse event */
+}
+
+.vh-track-circle.active {
+  fill:#aaa;
+}
+
+.year.label {
+  font: 120px sans-serif;
+  fill: #ddd;
+  pointer-events: none; /* do not handle mouse event */
+}
+
+.year.label.active {
+  fill: #aaa;
+}

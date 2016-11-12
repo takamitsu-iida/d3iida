@@ -76,6 +76,13 @@ d3.select('#hello').datum(dataset).call(hello);
 [ライブデモ](https://sites.google.com/site/d3iidademo/06_slider)
 
 
+## 07_vhover.html
+
+クリックもドラッグも不要、マウスオーバーだけでデータを選択します。組み込み用です。
+
+[ライブデモ](https://sites.google.com/site/d3iidademo/07_vhover)
+
+
 ## 11_multiLineChart.html
 
 応用編です。
