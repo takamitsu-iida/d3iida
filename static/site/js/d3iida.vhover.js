@@ -171,18 +171,18 @@
 
         // 目盛を表示する領域'g'を追加
         // スライダよりも20pxだけ右に、10px下にズラす
-        var ticksAll = baseLayer.selectAll('.' + CLASS_TRACK_TICKS).data(['dummy']);
-        var ticks = ticksAll
+        var ticksLayerAll = baseLayer.selectAll('.' + CLASS_TRACK_TICKS).data(['dummy']);
+        var ticksLayer = ticksLayerAll
           // ENTER領域
           .enter()
           .append('g')
           .classed(CLASS_TRACK_TICKS, true)
           // ENTER + UPDATE領域
-          .merge(ticksAll)
+          .merge(ticksLayerAll)
           .attr('transform', 'translate(20,10)');
 
         // 目盛になるテキスト
-        var ticksTextAll = ticks.selectAll('text').data(yScale.ticks(data.length));
+        var ticksTextAll = ticksLayer.selectAll('text').data(yScale.ticks(data.length - 1));
         ticksTextAll
           // ENTER領域
           .enter()
@@ -270,6 +270,9 @@
       }
       height = _;
       h = height - margin.top - margin.bottom;
+
+      // スケール関数の出力レンジを補正する
+      yScale.range([0, h]);
       return this;
     };
 
