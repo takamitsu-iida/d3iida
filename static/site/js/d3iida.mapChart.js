@@ -80,35 +80,29 @@
         .append('a')
         .on('click', function(d) {
           // console.log(d);
-          zoomToCity(d.id);
+          if (d.id === 'all') {
+            resetZoom();
+          } else {
+            zoomToCity(d.id);
+          }
           container.select('.d3iida-control').selectAll('a').classed('active', false);
           d3.select(this).classed('active', true);
         })
-        // .merge(aAll)
+        .merge(aAll)
         .html(function(d) {
           return d.name;
-        });
-
-      aAll
-        .html(function(d) {
-          return d.name;
+        })
+        .select(function(d) {
+          // idがallになっているものを選択状態にする
+          if (d.id === 'all') {
+            d3.select(this).classed('active', true);
+          }
         });
 
       aAll
         .exit()
         .remove();
 
-      // 先頭のリンクは、都市ではないので、クリック時にはズームをリセットする
-      container.select('.d3iida-control')
-        .select('a')
-        .classed('active', true)
-        .on('click', function(d) {
-          // なぜか、このdが期待と違い、コンテナに紐付いたデータになってしまう
-          // どのみちこの値は使わないのでよいのだが、バグなのか、ちょっと気になる
-          resetZoom();
-          container.select('.d3iida-control').selectAll('a').classed('active', false);
-          d3.select(this).classed('active', true);
-        });
       //
     }
 
