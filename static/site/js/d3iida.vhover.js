@@ -39,7 +39,7 @@
     var CLASS_LABEL = 'vh-label';
 
     // 外枠の大きさ
-    var width = 350;
+    var width = 450;
     var height = 450;
 
     // 60pxの極太ラインを描画するので、その半分の30pxは必ずズラす
@@ -207,9 +207,9 @@
           .append('text')
           .classed(CLASS_LABEL, true)
           .merge(labelAll)
-          .attr('text-anchor', 'end')
-          .attr('x', w)
-          .attr('dy', '.45em')
+          .attr('text-anchor', 'start') // 'end'
+          .attr('x', 80) // w
+          .attr('dy', '.55em')
           .attr('class', 'year label')
           .text(data[0]);
 

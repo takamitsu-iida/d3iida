@@ -45,7 +45,8 @@
 }
 
 .year.label {
-  font: 120px sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 120px;
   fill: #ddd;
   pointer-events: none; /* do not handle mouse event */
 }
