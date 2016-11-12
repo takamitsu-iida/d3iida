@@ -41,7 +41,7 @@
   stroke-width    : 1.0px;
   stroke-linejoin : round;
   stroke-linecap  : round;
-  cursor          : pointer; /* change cursor to enable click */
+  cursor          : pointer; /* change cursor for click operation */
   pointer-events  : all;
 }
   .prefecture.active {
