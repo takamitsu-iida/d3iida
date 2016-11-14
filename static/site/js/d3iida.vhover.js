@@ -63,7 +63,7 @@
     var label;
 
     // スケール関数と出力レンジ指定
-    var yScale = d3.scaleLinear().range([0, h]);
+    var yScale = d3.scaleLinear().range([0, h]).clamp(true);
 
     // ドメイン指定は、データ入手後にsetDomain()で行う
     var ydomain;
@@ -207,8 +207,8 @@
           .append('text')
           .classed(CLASS_LABEL, true)
           .merge(labelAll)
-          .attr('text-anchor', 'start') // 'end'
-          .attr('x', 80) // w
+          .attr('text-anchor', 'start') // 右寄せするなら'end'を指定
+          .attr('x', 80) // その場合の'x'は一番右側を指す w
           .attr('dy', '.55em')
           .attr('class', 'year label')
           .text(data[0]);
