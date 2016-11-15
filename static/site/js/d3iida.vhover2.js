@@ -360,15 +360,12 @@
         .tween('vhover2', function() {
           var i = d3.interpolate(current, maxValue);
           return function(d) {
-            var yyyy = Math.round(i(d));
+            var yyyy = Math.floor(i(d)); // round(i(d));
             if (current !== yyyy) {
               setCurrent(yyyy);
             }
             if (yyyy === maxValue) {
               // console.log('最大値に到達しました');
-              // Math.round()でまるめているため、予定よりも早く到達してしまう
-              // スライダのトランジションをここで停止する
-              baseLayer.interrupt();
               focus.selectAll('circle').classed('transition', false);
             }
           };
