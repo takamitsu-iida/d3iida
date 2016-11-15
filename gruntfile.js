@@ -19,6 +19,7 @@ module.exports = function (grunt) {
           'static/site/js/d3iida.simpleTable.js',
           'static/site/js/d3iida.slider.js',
           'static/site/js/d3iida.vhover.js',
+          'static/site/js/d3iida.vhover2.js',
           'static/site/js/d3iida.sliderChart.js',
           'static/site/js/d3iida.tweenChart.js',
           'static/site/js/d3iida.tooltip.js',

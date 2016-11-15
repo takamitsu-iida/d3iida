@@ -44,13 +44,37 @@
   fill:#aaa;
 }
 
-.year.label {
+.vh-label-text {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 120px;
   fill: #ddd;
   pointer-events: none; /* do not handle mouse event */
 }
 
-.year.label.active {
+.vh-label-text.active {
   fill: #aaa;
+}
+
+/* vhover2 */
+
+.vh-focus-inset {
+  fill:#aaa;
+  stroke: #ddd;
+  stroke-width: 4px;
+  pointer-events: none; /* do not handle mouse event */
+}
+
+.vh-focus-inset.transition {
+  fill:blue;
+}
+
+.vh-focus-outline {
+  fill: none;
+  stroke: #aaa;
+  stroke-width: 2px;
+  pointer-events: none; /* do not handle mouse event */
+}
+
+.vh-focus-outline.transition {
+  stroke: blue;
 }

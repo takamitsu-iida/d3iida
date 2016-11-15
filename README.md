@@ -83,6 +83,13 @@ d3.select('#hello').datum(dataset).call(hello);
 [ライブデモ](https://sites.google.com/site/d3iidademo/07_vhover)
 
 
+## 08_vhover2.html
+
+自走するvhover。クリックでトランジションを開始・停止します。組み込み用です。
+
+[ライブデモ](https://sites.google.com/site/d3iidademo/08_vhover2)
+
+
 ## 11_multiLineChart.html
 
 応用編です。
