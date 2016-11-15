@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <!-- IE9以降で正しく機能するようにする -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <title>d3iida.js</title>
+
+  <!-- d3.js v4をインクルード -->
+  <script src="./static/d3.4.3.0/d3.min.js"></script>
+  <script src="./static/d3-scale-chromatic/d3-scale-chromatic.min.js"></script>
+
+  <!-- topojsonをインクルード -->
+  <script src="./static/topojson.1.6.27/topojson.min.js"></script>
+
+  <!-- スタイルシート -->
+  <link rel="stylesheet" href="./static/site/css/d3iida.css" type="text/css">
+  <link rel="stylesheet" href="./static/site/css/d3iida.japan.css" type="text/css">
+  <link rel="stylesheet" href="./static/site/css/d3iida.vhover.css" type="text/css">
+
+  <!-- d3iidaをインクルード -->
+  <script src="./static/site/js/d3iida.startup.js"></script>
+  <script src="./static/site/js/d3iida.vhover2.js"></script>
+  <script src="./static/site/js/d3iida.geodata.japan.js"></script>
+  <script src="./static/site/js/d3iida.geodata.prefectures.js"></script>
+  <script src="./static/site/js/d3iida.populationMap.js"></script>
+</head>
+
+<body>
+
+  <h1>populationMap</h1>
+  <p>
+    都道府県別人口増加率をプロットします。
+  </p>
+  <div class="vizContainer">
+    <div id="mapChart"></div>
+  </div>
+
+  <p>
+    出典：「人口推計」（総務省統計局）<br>
+    <a href="http://www.e-stat.go.jp/SG1/estat/List.do?bid=000001039703&cycode=0" target="_blank">人口推計 長期時系列データ 長期時系列データ（平成12年～22年）</a>
+  </p>
+
+  <script>
+    d3iida.populationMap.example();
+  </script>
+
+</body>
+
+</html>

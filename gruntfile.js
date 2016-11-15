@@ -24,6 +24,7 @@ module.exports = function (grunt) {
           'static/site/js/d3iida.tweenChart.js',
           'static/site/js/d3iida.tooltip.js',
           'static/site/js/d3iida.mapChart.js',
+          'static/site/js/d3iida.populationMap.js',
           'static/site/js/d3iida.geodata.japan.js',
           'static/site/js/d3iida.geodata.prefectures.js'
           ],

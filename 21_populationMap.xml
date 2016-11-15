@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- 【参考URL】https://github.com/prog-mitsu/runJsInGoogleSite -->
+
+<!-- https://sites.google.com/site/d3iidademo/static/site/20_mapChart.xml -->
+<!-- サイズは横800ピクセル, 高さ600, webページとして作成し、ページ設定で添付ファイルの許可を外す(全部のチェックを外す) -->
+
+<Module>
+
+  <!-- ガジェット名 -->
+  <ModulePrefs title="d3iida" />
+
+  <Content type="html">
+    <![CDATA[
+
+      <!-- JSファイル -->
+      <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/d3-4-3-0/d3.min.js'></script>
+      <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/topojson-1-6-27/topojson.min.js'></script>
+      <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/static/d3-scale-chromatic/d3-scale-chromatic.min.js'></script>
+
+      <!-- d3iida -->
+      <link rel="stylesheet" type="text/css" href='//sites.google.com/site/d3iidademo/static/site/dist/d3iida.css'/>
+      <script type="text/javascript" src='//sites.google.com/site/d3iidademo/static/site/dist/d3iida-min.js'></script>
+
+      <h1>populationMap</h1>
+      <p>
+        都道府県別人口増加率をプロットします。
+      </p>
+      <div class="vizContainer">
+        <div id="mapChart"></div>
+      </div>
+
+      <p>
+        出典：「人口推計」（総務省統計局）<br>
+        <a href="http://www.e-stat.go.jp/SG1/estat/List.do?bid=000001039703&cycode=0" target="_blank">人口推計 長期時系列データ 長期時系列データ（平成12年～22年）</a>
+      </p>
+
+      <script>
+        d3iida.populationMap.example();
+      </script>
+
+    ]]>
+  </Content>
+</Module>
