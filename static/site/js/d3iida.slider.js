@@ -282,9 +282,8 @@
       }
 
       // 現在位置から計算して、残り時間がどのくらいかを計算してトランジションを作成する
-      hueTarget = maxValue;
       var t = d3.transition()
-        .duration((hueTarget - hueActual) / (maxValue - minValue) * duration)
+        .duration((maxValue - hueActual) / (maxValue - minValue) * duration)
         .ease(d3.easeLinear);
 
       // トランジションをかけて移動する
