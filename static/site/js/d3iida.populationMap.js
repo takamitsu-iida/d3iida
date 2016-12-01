@@ -31,6 +31,9 @@
     var w = width - margin.left - margin.right;
     var h = height - margin.top - margin.bottom;
 
+    // ダミーデータ
+    var dummy = ['dummy'];
+
     // クリックで移動可能な県
     var cities = [
       {
@@ -59,7 +62,7 @@
     // クリックで都市に移動するためのリンクを追加する
     function initControls(container) {
       // <div class='d3iida-controls'></div>をひとつだけ作成する
-      container.selectAll('.d3iida-controls').data(['dummy'])
+      container.selectAll('.d3iida-controls').data(dummy)
         .enter()
         .append('div')
         .classed('d3iida-controls', true)
@@ -229,7 +232,7 @@
         initControls(container);
 
         // svgを一つ作成する
-        var svgAll = container.selectAll('svg').data(['dummy']);
+        var svgAll = container.selectAll('svg').data(dummy);
         svgAll
           // ENTER領域
           .enter()
@@ -274,7 +277,7 @@
         // 特に pointer-events:を指定するかどうかで、マウスイベントを拾うかどうかを制御している
 
         // ズーム動作をリセットするための'rect'を追加する
-        var resetLayerAll = svg.selectAll('.pm-reset-layer').data(['dummy']);
+        var resetLayerAll = svg.selectAll('.pm-reset-layer').data(dummy);
         resetLayerAll
           .enter()
           .append('rect')
@@ -287,7 +290,7 @@
           .attr('height', height);
 
         // 地図を描画するレイヤ 'g'
-        var mapLayerAll = svg.selectAll('.pm-map-layer').data(['dummy']);
+        var mapLayerAll = svg.selectAll('.pm-map-layer').data(dummy);
         var mapLayer = mapLayerAll
           .enter()
           .append('g')
@@ -337,7 +340,7 @@
 
     function init_vhover() {
       // vhoverを配置するレイヤ 'g'
-      var vhoverLayerAll = svg.selectAll('.pm-vhover-layer').data(['dummy']);
+      var vhoverLayerAll = svg.selectAll('.pm-vhover-layer').data(dummy);
       var vhoverLayer = vhoverLayerAll
         .enter()
         .append('g')
@@ -365,7 +368,7 @@
     function init_legend() {
       // 凡例のレイヤ
       // 位置は適当に調整
-      var legendLayerAll = svg.selectAll('.pm-legend-layer').data(['dummy']);
+      var legendLayerAll = svg.selectAll('.pm-legend-layer').data(dummy);
       var legendLayer = legendLayerAll
         .enter()
         .append('g')

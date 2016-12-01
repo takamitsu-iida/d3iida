@@ -40,6 +40,9 @@
     // 丸
     var CLASS_SLIDER_HANDLE = 'sl-slider-handle';
 
+    // ダミーデータ
+    var dummy = ['dummy'];
+
     // ボタン設置場所へのマージン
     var buttonMargin = {
       top: 40,
@@ -144,7 +147,7 @@
       container = _selection;
 
       // ボタンを配置するコンテナ 'g' を作ってcall()する
-      var ssbuttonContainerAll = container.selectAll('.' + CLASS_BUTTON_CONTAINER).data(['dummy']);
+      var ssbuttonContainerAll = container.selectAll('.' + CLASS_BUTTON_CONTAINER).data(dummy);
       ssbuttonContainerAll
         .enter()
         .append('g')
@@ -155,7 +158,7 @@
         .call(ssbutton);
 
       // スライダを配置するコンテナ 'g' を作って'sliderContainer'クラスを付与する
-      var sliderContainerAll = container.selectAll('.' + CLASS_SLIDER_CONTAINER).data(['dummy']);
+      var sliderContainerAll = container.selectAll('.' + CLASS_SLIDER_CONTAINER).data(dummy);
       slider = sliderContainerAll
         // ENTER領域
         .enter()
@@ -169,7 +172,7 @@
 
       // 一番下は太さ50pxの極太ライン(rectでもいいけど、ラインの方が指定するポイントが少なくてすむ)
       // ドラッグイベントを処理する
-      var sliderTrackBackgroundAll = slider.selectAll('.' + CLASS_TRACK_BACKGROUND).data(['dummy']);
+      var sliderTrackBackgroundAll = slider.selectAll('.' + CLASS_TRACK_BACKGROUND).data(dummy);
       sliderTrackBackgroundAll
         .enter()
         .append('line')
@@ -182,7 +185,7 @@
         .call(drag);
 
       // 次に置くのは輪郭になる太さ10pxのライン
-      var sliderTrackOutlineAll = slider.selectAll('.' + CLASS_TRACK_OUTLINE).data(['dummy']);
+      var sliderTrackOutlineAll = slider.selectAll('.' + CLASS_TRACK_OUTLINE).data(dummy);
       sliderTrackOutlineAll
         .enter()
         .append('line')
@@ -192,7 +195,7 @@
         .attr('x2', xScale.range()[1]);
 
       // 次に置くのは内側を塗りつぶす太さ8pxのライン
-      var sliderTrackInsetAll = slider.selectAll('.' + CLASS_TRACK_INSET).data(['dummy']);
+      var sliderTrackInsetAll = slider.selectAll('.' + CLASS_TRACK_INSET).data(dummy);
       sliderTrackInsetAll
         .enter()
         .append('line')
@@ -203,7 +206,7 @@
 
       // 目盛を表示する領域'g'を追加
       // スライダよりも18pxだけ下に下げる
-      var ticksAll = slider.selectAll('.' + CLASS_SLIDER_TICKS).data(['dummy']);
+      var ticksAll = slider.selectAll('.' + CLASS_SLIDER_TICKS).data(dummy);
       ticksAll
         // ENTER領域
         .enter()
@@ -234,7 +237,7 @@
         .remove();
 
       // ハンドルを追加する
-      var handleAll = slider.selectAll('.' + CLASS_SLIDER_HANDLE).data(['dummy']);
+      var handleAll = slider.selectAll('.' + CLASS_SLIDER_HANDLE).data(dummy);
       handle = handleAll
         .enter()
         .append('circle')
@@ -379,6 +382,9 @@
     var CLASS_BUTTON_RECT = 'sl-ssbutton';
     var CLASS_BUTTON_TEXT = 'sl-ssbutton-text';
 
+    // ダミーデータ
+    var dummy = ['dummy'];
+
     // 表示テキスト
     var text = '開始';
 
@@ -399,7 +405,7 @@
       container = _selection;
 
       // コンテナにテキストをのせる
-      var ssbuttonTextAll = container.selectAll('.' + CLASS_BUTTON_TEXT).data(['dummy']);
+      var ssbuttonTextAll = container.selectAll('.' + CLASS_BUTTON_TEXT).data(dummy);
       var ssbuttonText = ssbuttonTextAll
         .enter()
         .append('text')
@@ -411,7 +417,7 @@
       var bbox = ssbuttonText.node().getBBox();
 
       // ボタンとなる'rectをテキストの前に挿入する
-      var ssbuttonAll = container.selectAll('.' + CLASS_BUTTON_RECT).data(['dummy']);
+      var ssbuttonAll = container.selectAll('.' + CLASS_BUTTON_RECT).data(dummy);
       ssbuttonAll
         .enter()
         .insert('rect', '.' + CLASS_BUTTON_TEXT)

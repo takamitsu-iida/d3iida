@@ -27,6 +27,9 @@
     var w = width - margin.left - margin.right;
     var h = height - margin.top - margin.bottom;
 
+    // ダミーデータ
+    var dummy = ['dummy'];
+
     // スケール関数
     var xScale = d3.scaleTime(); // 初期値は d3.scaleTime();
     var yScale = d3.scaleLinear(); // 初期値は d3.scaleLinear();
@@ -97,7 +100,7 @@
         yScale.domain(yextent).range([h, 0]).nice();
 
         // ダミーデータを紐付けてSVGの重複作成を防止する
-        var svgAll = d3.select(this).selectAll('svg').data(['dummy']);
+        var svgAll = d3.select(this).selectAll('svg').data(dummy);
         svgAll
           // ENTER領域
           .enter()
@@ -108,7 +111,7 @@
           .attr('height', height);
 
         // チャートレイヤを作成
-        var chartLayerAll = d3.select(this).select('svg').selectAll('.chartLayer').data(['dummy']);
+        var chartLayerAll = d3.select(this).select('svg').selectAll('.chartLayer').data(dummy);
         chartLayerAll
           .enter()
           .append('g')
@@ -122,7 +125,7 @@
         var chartLayer = d3.select(this).select('.chartLayer');
 
         // x軸を追加する。クラス名はCSSと合わせる
-        var xaxisAll = chartLayer.selectAll('.x-axis').data(['dummy']);
+        var xaxisAll = chartLayer.selectAll('.x-axis').data(dummy);
         xaxisAll
           .enter()
           .append('g')
@@ -132,7 +135,7 @@
           .call(d3.axisBottom(xScale).ticks(12, '%I:%M'));
 
         // X軸に対してグリッド線を引く(Y軸と平行の線)
-        var xgridAll = chartLayer.selectAll('.x-grid').data(['dummy']);
+        var xgridAll = chartLayer.selectAll('.x-grid').data(dummy);
         xgridAll
           .enter()
           .append('g')
@@ -143,7 +146,7 @@
           .call(make_x_gridlines().tickSize(-h).tickFormat(''));
 
         // y軸を追加する。クラス名はCSSと合わせる
-        var yaxisAll = chartLayer.selectAll('.y-axis').data(['dummy']);
+        var yaxisAll = chartLayer.selectAll('.y-axis').data(dummy);
         yaxisAll
           .enter()
           .append('g')
@@ -152,7 +155,7 @@
           .call(d3.axisLeft(yScale));
 
         // Y軸に対してグリッド線を引く(X軸と平行の線)
-        var ygridAll = chartLayer.selectAll('.y-grid').data(['dummy']);
+        var ygridAll = chartLayer.selectAll('.y-grid').data(dummy);
         ygridAll
           .enter()
           .append('g')
@@ -162,7 +165,7 @@
           .call(make_y_gridlines().tickSize(-w).tickFormat(''));
 
         // X軸のラベルを追加
-        var xaxisTextAll = chartLayer.selectAll('.x-axis-text').data(['dummy']);
+        var xaxisTextAll = chartLayer.selectAll('.x-axis-text').data(dummy);
         xaxisTextAll
           .enter()
           .append('text')
@@ -174,7 +177,7 @@
           .text(xAxisText);
 
         // Y軸のラベルを追加
-        var yaxisTextAll = chartLayer.selectAll('.y-axis-text').data(['dummy']);
+        var yaxisTextAll = chartLayer.selectAll('.y-axis-text').data(dummy);
         yaxisTextAll
           .enter()
           .append('text')

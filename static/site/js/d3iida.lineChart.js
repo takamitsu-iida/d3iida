@@ -23,6 +23,9 @@
     var w = width - margin.left - margin.right;
     var h = height - margin.top - margin.bottom;
 
+    // ダミーデータ
+    var dummy = ['dummy'];
+
     // カスタムイベントを登録する
     var dispatch = d3.dispatch('customHover');
 
@@ -65,7 +68,7 @@
         }
 
         // ダミーデータを紐付けることでsvgの重複作成を防止する
-        var svgAll = d3.select(this).selectAll('svg').data(['dummy']);
+        var svgAll = d3.select(this).selectAll('svg').data(dummy);
 
         svgAll
           // ENTER領域
@@ -87,7 +90,7 @@
         }
 
         // チャート描画領域'g'を追加
-        var lineChartAll = d3.select(this).select('svg').selectAll('.lineChart').data(['dummy']);
+        var lineChartAll = d3.select(this).select('svg').selectAll('.lineChart').data(dummy);
         lineChartAll
           // ENTER領域
           .enter()
@@ -120,7 +123,7 @@
         var lineChart = d3.select(this).select('.lineChart');
 
         // x軸を追加する。クラス名はCSSと合わせる
-        var xAxisAll = lineChart.selectAll('.x-axis').data(['dummy']);
+        var xAxisAll = lineChart.selectAll('.x-axis').data(dummy);
         xAxisAll
           // ENTER領域
           .enter()
@@ -137,7 +140,7 @@
         }
 
         // y軸を追加する。クラス名はCSSと合わせる
-        var yAxisAll = lineChart.selectAll('.y-axis').data(['dummy']);
+        var yAxisAll = lineChart.selectAll('.y-axis').data(dummy);
         yAxisAll
           // ENTER領域
           .enter()
@@ -152,7 +155,7 @@
 
         // X軸に対してグリッド線を引く(Y軸と平行の線)
         if (drawXGrid) {
-          var xGridAll = lineChart.selectAll('.x-grid').data(['dummy']);
+          var xGridAll = lineChart.selectAll('.x-grid').data(dummy);
           xGridAll
             // ENTER領域
             .enter()
@@ -168,7 +171,7 @@
 
         // Y軸に対してグリッド線を引く(X軸と平行の線)
         if (drawYGrid) {
-          var yGridAll = lineChart.selectAll('.y-grid').data(['dummy']);
+          var yGridAll = lineChart.selectAll('.y-grid').data(dummy);
           yGridAll
             // ENTER領域
             .enter()
@@ -194,7 +197,7 @@
           .attr('transform', 'translate(' + xScale(-1) + ')');
 
         // 初回call()時のみpathを追加
-        lineChart.selectAll('.pathG').data(['dummy'])
+        lineChart.selectAll('.pathG').data(dummy)
           // ENTER領域
           .enter()
           .append('g')

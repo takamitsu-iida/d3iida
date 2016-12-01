@@ -19,6 +19,9 @@
     var w = width - margin.left - margin.right;
     var h = height - margin.top - margin.bottom;
 
+    // ダミーデータ
+    var dummy = ['dummy'];
+
     // ボタンのサイズ、色、配置間隔
     var buttonSize = 8;
     var buttonColorOut = '#999';
@@ -49,7 +52,7 @@
         }
 
         // ダミーデータを紐付けることで重複作成を防止する
-        var svgAll = d3.select(this).selectAll('svg').data(['dummy']);
+        var svgAll = d3.select(this).selectAll('svg').data(dummy);
 
         // ENTER領域
         var mainLayer = svgAll.enter()
@@ -142,7 +145,7 @@
           });
 
         // focus
-        mainLayer.selectAll('.d3iida-radio-focus-circle').data(['dummy']).enter()
+        mainLayer.selectAll('.d3iida-radio-focus-circle').data(dummy).enter()
           // ENTER領域
           .append('circle')
           .attr('class', 'd3iida-radio-focus-circle')

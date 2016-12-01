@@ -19,6 +19,9 @@
     // 例： var chart = sliderChart(true);
     var needsvg = arguments.length ? _accessor : false;
 
+    // ダミーデータ
+    var dummy = ['dummy'];
+
     //
     // CSSクラス名定義
     //
@@ -130,7 +133,7 @@
 
         // svgの作成を必要とするなら、新たにsvgを作成して、それをコンテナにする
         if (needsvg) {
-          var svgAll = container.selectAll('svg').data(['dummy']);
+          var svgAll = container.selectAll('svg').data(dummy);
           container = svgAll
             .enter()
             .append('svg')
@@ -140,7 +143,7 @@
         }
 
         // レイヤ'g'を追加
-        var baseLayerAll = container.selectAll('.' + CLASS_BASE_LAYER).data(['dummy']);
+        var baseLayerAll = container.selectAll('.' + CLASS_BASE_LAYER).data(dummy);
         baseLayer = baseLayerAll
           // ENTER領域
           .enter()
@@ -156,7 +159,7 @@
 
         // 一番下は太さ60pxの極太ライン
         // マウスイベントはここで処理する
-        var trackBackgroundAll = baseLayer.selectAll('.' + CLASS_TRACK_BACKGROUND).data(['dummy']);
+        var trackBackgroundAll = baseLayer.selectAll('.' + CLASS_TRACK_BACKGROUND).data(dummy);
         trackBackgroundAll
           .enter()
           .append('line')
@@ -171,7 +174,7 @@
           .on('click', mouseclick);
 
         // 次に置くのは内側を塗りつぶす太さ8pxのライン
-        var trackInsetAll = baseLayer.selectAll('.' + CLASS_TRACK_INSET).data(['dummy']);
+        var trackInsetAll = baseLayer.selectAll('.' + CLASS_TRACK_INSET).data(dummy);
         trackInsetAll
           .enter()
           .append('line')
@@ -194,7 +197,7 @@
           });
 
         // 選択中のものに付与するfocus
-        var focusLayerAll = baseLayer.selectAll('.' + CLASS_FOCUS_LAYER).data(['dummy']);
+        var focusLayerAll = baseLayer.selectAll('.' + CLASS_FOCUS_LAYER).data(dummy);
         focus = focusLayerAll
           .enter()
           .append('g')
@@ -203,7 +206,7 @@
           .attr('x', 0)
           .attr('y', 0);
 
-        var focusInsetAll = focus.selectAll('.' + CLASS_FOCUS_INSET).data(['dummy']);
+        var focusInsetAll = focus.selectAll('.' + CLASS_FOCUS_INSET).data(dummy);
         focusInsetAll
           .enter()
           .append('circle')
@@ -213,7 +216,7 @@
           .attr('cy', 0)
           .attr('r', 12);
 
-        var focusOutlineAll = focus.selectAll('.' + CLASS_FOCUS_OUTLINE).data(['dummy']);
+        var focusOutlineAll = focus.selectAll('.' + CLASS_FOCUS_OUTLINE).data(dummy);
         focusOutlineAll
           .enter()
           .append('circle')
@@ -225,7 +228,7 @@
 
         // 目盛を表示する領域'g'を追加
         // スライダよりも20pxだけ右に、10px下にズラす
-        var ticksLayerAll = baseLayer.selectAll('.' + CLASS_TRACK_TICKS).data(['dummy']);
+        var ticksLayerAll = baseLayer.selectAll('.' + CLASS_TRACK_TICKS).data(dummy);
         var ticksLayer = ticksLayerAll
           // ENTER領域
           .enter()
@@ -256,7 +259,7 @@
 
         // 選択値を表示する巨大'text'を配置するためのコンテナ 'g' を作り、80px右にズラす
         // 軸のticksのフォントサイズ、文字数によって調整すべし
-        var labelLayerAll = baseLayer.selectAll('.' + CLASS_LABEL_LAYER).data(['dummy']);
+        var labelLayerAll = baseLayer.selectAll('.' + CLASS_LABEL_LAYER).data(dummy);
         var labelLayer = labelLayerAll
           .enter()
           .append('g')
@@ -410,6 +413,9 @@
     var CLASS_BUTTON_RECT = 'vh2-ssbutton';
     var CLASS_BUTTON_TEXT = 'vh2-ssbutton-text';
 
+    // ダミーデータ
+    var dummy = ['dummy'];
+
     // 表示テキスト
     var text = '開始';
 
@@ -430,7 +436,7 @@
       container = _selection;
 
       // コンテナにテキストをのせる
-      var ssbuttonTextAll = container.selectAll('.' + CLASS_BUTTON_TEXT).data(['dummy']);
+      var ssbuttonTextAll = container.selectAll('.' + CLASS_BUTTON_TEXT).data(dummy);
       var ssbuttonText = ssbuttonTextAll
         .enter()
         .append('text')
@@ -442,7 +448,7 @@
       var bbox = ssbuttonText.node().getBBox();
 
       // ボタンとなる'rectをテキストの前に挿入する
-      var ssbuttonAll = container.selectAll('.' + CLASS_BUTTON_RECT).data(['dummy']);
+      var ssbuttonAll = container.selectAll('.' + CLASS_BUTTON_RECT).data(dummy);
       ssbuttonAll
         .enter()
         .insert('rect', '.' + CLASS_BUTTON_TEXT)

@@ -16,6 +16,9 @@
     // 例： var chart = sliderChart(true);
     var needsvg = arguments.length ? _accessor : false;
 
+    // ダミーデータ
+    var dummy = ['dummy'];
+
     //
     // CSSクラス名定義
     //
@@ -104,7 +107,7 @@
 
         // svgの作成を必要とするなら、新たにsvgを作成して、それをコンテナにする
         if (needsvg) {
-          var svgAll = container.selectAll('svg').data(['dummy']);
+          var svgAll = container.selectAll('svg').data(dummy);
           container = svgAll
             .enter()
             .append('svg')
@@ -114,7 +117,7 @@
         }
 
         // レイヤ'g'を追加
-        var baseLayerAll = container.selectAll('.' + CLASS_BASE_LAYER).data(['dummy']);
+        var baseLayerAll = container.selectAll('.' + CLASS_BASE_LAYER).data(dummy);
         var baseLayer = baseLayerAll
           // ENTER領域
           .enter()
@@ -130,7 +133,7 @@
 
         // 一番下は太さ60pxの極太ライン
         // マウスイベントはここで処理する
-        var trackBackgroundAll = baseLayer.selectAll('.' + CLASS_TRACK_BACKGROUND).data(['dummy']);
+        var trackBackgroundAll = baseLayer.selectAll('.' + CLASS_TRACK_BACKGROUND).data(dummy);
         trackBackgroundAll
           .enter()
           .append('line')
@@ -144,7 +147,7 @@
           .on('touchmove', mousemove);
 
         // 次に置くのは内側を塗りつぶす太さ8pxのライン
-        var trackInsetAll = baseLayer.selectAll('.' + CLASS_TRACK_INSET).data(['dummy']);
+        var trackInsetAll = baseLayer.selectAll('.' + CLASS_TRACK_INSET).data(dummy);
         trackInsetAll
           .enter()
           .append('line')
@@ -168,7 +171,7 @@
 
         // 目盛を表示する領域'g'を追加
         // スライダよりも20pxだけ右に、10px下にズラす
-        var ticksLayerAll = baseLayer.selectAll('.' + CLASS_TRACK_TICKS).data(['dummy']);
+        var ticksLayerAll = baseLayer.selectAll('.' + CLASS_TRACK_TICKS).data(dummy);
         var ticksLayer = ticksLayerAll
           // ENTER領域
           .enter()
@@ -198,7 +201,7 @@
           .remove();
 
         // 選択値を表示する巨大'text'
-        var labelAll = baseLayer.selectAll('.' + CLASS_LABEL_TEXT).data(['dummy']);
+        var labelAll = baseLayer.selectAll('.' + CLASS_LABEL_TEXT).data(dummy);
         label = labelAll
           .enter()
           .append('text')

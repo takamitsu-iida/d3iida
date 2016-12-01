@@ -35,6 +35,9 @@
     var w = width - margin.left - margin.right;
     var h = height - margin.top - margin.bottom;
 
+    // ダミーデータ
+    var dummy = ['dummy'];
+
     // カスタムイベントを登録する
     var dispatch = d3.dispatch('brushing');
 
@@ -66,7 +69,7 @@
     // クリックで都市に移動するためのリンクを追加する
     function initControls(container) {
       // <div class='d3iida-controls'></div>をひとつだけ作成する
-      container.selectAll('.d3iida-controls').data(['dummy'])
+      container.selectAll('.d3iida-controls').data(dummy)
         .enter()
         .append('div')
         .classed('d3iida-controls', true)
@@ -244,7 +247,7 @@
 
       // レイヤを新規作成
       // 紐付けるデータはENTER領域を作るためのダミーなので、なんでもよい
-      svg.selectAll('.brushLayer').data(['dummy']).enter()
+      svg.selectAll('.brushLayer').data(dummy).enter()
         .append('g')
         .attr('width', w)
         .attr('height', h)
@@ -303,7 +306,7 @@
         initControls(container);
 
         // svgを一つ作成する
-        var svgAll = container.selectAll('svg').data(['dummy']);
+        var svgAll = container.selectAll('svg').data(dummy);
         svgAll
           // ENTER領域
           .enter()
@@ -348,7 +351,7 @@
         // 特に pointer-events:を指定するかどうかで、マウスイベントを拾うかどうかを制御している
 
         // ズーム動作をリセットするための'rect'を追加する
-        var resetRectAll = svg.selectAll('.resetRect').data(['dummy']);
+        var resetRectAll = svg.selectAll('.resetRect').data(dummy);
         resetRectAll
           .enter()
           .append('rect')
@@ -361,7 +364,7 @@
           .attr('height', height);
 
         // 地図を描画するレイヤ 'g'
-        var mapLayerAll = svg.selectAll('.mapLayer').data(['dummy']);
+        var mapLayerAll = svg.selectAll('.mapLayer').data(dummy);
         mapLayerAll
           .enter()
           .append('g')
@@ -392,7 +395,7 @@
           });
 
         // サイトを描画するレイヤ
-        var siteLayerAll = svg.selectAll('.siteLayer').data(['dummy']);
+        var siteLayerAll = svg.selectAll('.siteLayer').data(dummy);
         var siteLayer = siteLayerAll
           .enter()
           .append('g')
@@ -448,7 +451,7 @@
           .remove();
 
         // コンテナにブラシ制御用の<div>を作り、ラジオボタンをcall()する
-        container.selectAll('#brushControl').data(['dummy'])
+        container.selectAll('#brushControl').data(dummy)
           .enter()
           .append('div')
           .attr('id', 'brushControl')

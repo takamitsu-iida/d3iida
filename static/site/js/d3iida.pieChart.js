@@ -18,6 +18,9 @@
       left: 20
     };
 
+    // ダミーデータ
+    var dummy = ['dummy'];
+
     // カスタムイベントを登録する
     var dispatch = d3.dispatch('customHover');
 
@@ -61,7 +64,7 @@
         // console.log(data);
 
         // ダミーデータを紐付けることでsvgの重複作成を防止する
-        var svgAll = d3.select(this).selectAll('svg').data(['dummy']);
+        var svgAll = d3.select(this).selectAll('svg').data(dummy);
 
         // ENTER領域
         // 既存のsvgがないならENTER領域にsvgを新規作成

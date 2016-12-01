@@ -13,6 +13,9 @@
     // call()時に渡されたデータ
     var data;
 
+    // ダミーデータ
+    var dummy = ['dummy'];
+
     //
     // クラス名定義
     //
@@ -144,7 +147,7 @@
     // レイヤにチャートを描画する
     function drawChart(layer, data) {
       // チャート描画領域'g'を追加
-      var sliderChartAll = layer.selectAll('.' + CLASS_CHART_LAYER).data(['dummy']);
+      var sliderChartAll = layer.selectAll('.' + CLASS_CHART_LAYER).data(dummy);
       var sliderChart = sliderChartAll
         // ENTER領域
         .enter()
@@ -157,7 +160,7 @@
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
       // x軸を追加する
-      var xAxisAll = sliderChart.selectAll('.x-axis').data(['dummy']);
+      var xAxisAll = sliderChart.selectAll('.x-axis').data(dummy);
       xAxisAll
         // ENTER領域
         .enter()
@@ -169,7 +172,7 @@
         .call(xaxis);
 
       // X軸のラベルを追加
-      var xAxisTextAll = sliderChart.selectAll('.x-axis-text').data(['dummy']);
+      var xAxisTextAll = sliderChart.selectAll('.x-axis-text').data(dummy);
       xAxisTextAll
         // ENTER領域
         .enter()
@@ -183,7 +186,7 @@
         .text(xAxisText);
 
       // y軸を追加する。クラス名はCSSと合わせる
-      var yAxisAll = sliderChart.selectAll('.y-axis').data(['dummy']);
+      var yAxisAll = sliderChart.selectAll('.y-axis').data(dummy);
       yAxisAll
         // ENTER領域
         .enter()
@@ -194,7 +197,7 @@
         .call(yaxis);
 
       // Y軸のラベルを追加
-      var yAxisTextAll = sliderChart.selectAll('.y-axis-text').data(['dummy']);
+      var yAxisTextAll = sliderChart.selectAll('.y-axis-text').data(dummy);
       yAxisTextAll
         // ENTER領域
         .enter()
@@ -211,7 +214,7 @@
 
       // X軸に対してグリッド線を引く(Y軸と平行の線)
       if (drawXGrid) {
-        var xGridAll = sliderChart.selectAll('.x-grid').data(['dummy']);
+        var xGridAll = sliderChart.selectAll('.x-grid').data(dummy);
         xGridAll
           // ENTER領域
           .enter()
@@ -224,7 +227,7 @@
 
       // Y軸に対してグリッド線を引く(X軸と平行の線)
       if (drawYGrid) {
-        var yGridAll = sliderChart.selectAll('.y-grid').data(['dummy']);
+        var yGridAll = sliderChart.selectAll('.y-grid').data(dummy);
         yGridAll
           // ENTER領域
           .enter()
@@ -234,7 +237,7 @@
           .call(make_y_gridlines().tickSize(-w).tickFormat(''));
 
         // グラフを表示
-        var pathGAll = sliderChart.selectAll('.pathG').data(['dummy']);
+        var pathGAll = sliderChart.selectAll('.pathG').data(dummy);
         var pathG = pathGAll
           // ENTER領域
           .enter()
@@ -244,7 +247,7 @@
           .attr('width', w)
           .attr('height', h);
 
-        var sliderChartAreaAll = pathG.selectAll('.' + CLASS_CHART_AREA).data(['dummy']);
+        var sliderChartAreaAll = pathG.selectAll('.' + CLASS_CHART_AREA).data(dummy);
         sliderChartAreaAll
           .enter()
           .append('path')
@@ -253,7 +256,7 @@
           .datum(data)
           .attr('d', area);
 
-        var sliderChartLineAll = pathG.selectAll('.' + CLASS_CHART_LINE).data(['dummy']);
+        var sliderChartLineAll = pathG.selectAll('.' + CLASS_CHART_LINE).data(dummy);
         linePath = sliderChartLineAll
           .enter()
           .append('path')
@@ -309,7 +312,7 @@
       var ty2 = h;
       var tdata = [[tx1, ty1], [tx2, ty2]];
 
-      var sliderChartTimelineAll = sliderChart.selectAll('.' + CLASS_TIMELINE).data(['dummy']);
+      var sliderChartTimelineAll = sliderChart.selectAll('.' + CLASS_TIMELINE).data(dummy);
       tpath = sliderChartTimelineAll
         .enter()
         .append('path')
@@ -317,7 +320,7 @@
         .merge(sliderChartTimelineAll)
         .attr('d', tline(tdata));
 
-      var tcircleAll = sliderChart.selectAll('.' + CLASS_TCIRCLE).data(['dummy']);
+      var tcircleAll = sliderChart.selectAll('.' + CLASS_TCIRCLE).data(dummy);
       tcircle = tcircleAll
         .enter()
         .append('circle')
@@ -398,7 +401,7 @@
 
     function drawSlider(layer) {
       // レイヤにスライダモジュールを配置する領域'g'を作成する
-      var sliderLayerAll = layer.selectAll('.' + CLASS_SLIDER_LAYER).data(['dummy']);
+      var sliderLayerAll = layer.selectAll('.' + CLASS_SLIDER_LAYER).data(dummy);
       var sliderLayer = sliderLayerAll
         // ENTER領域
         .enter()
@@ -439,7 +442,7 @@
 
         // svgの作成を必要とするなら、新たにsvgを作成して、それをコンテナにする
         if (needsvg) {
-          var svgAll = container.selectAll('svg').data(['dummy']);
+          var svgAll = container.selectAll('svg').data(dummy);
           container = svgAll
             .enter()
             .append('svg')
@@ -449,7 +452,7 @@
         }
 
         // コンテナに直接描画するのは気がひけるので、レイヤを１枚追加する
-        var layerAll = container.selectAll('.' + CLASS_BASE_LAYER).data(['dummy']);
+        var layerAll = container.selectAll('.' + CLASS_BASE_LAYER).data(dummy);
         var layer = layerAll
           // ENTER領域
           .enter()
