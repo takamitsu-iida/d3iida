@@ -35,7 +35,7 @@ hello.on('customHover', function(d) {
 d3.select('#hello').datum(dataset).call(hello);
 ```
 
-[ライブデモ](https://sites.google.com/site/d3iidademo/01_helloworld)
+[ライブデモ](https://takamitsu-iida.github.io/d3iida/01_helloWorld)
 
 
 以下、全てのモジュールが同じパターンで実装されています。
@@ -45,49 +45,49 @@ d3.select('#hello').datum(dataset).call(hello);
 
 バーチャートをモジュール化したものです。
 
-[ライブデモ](https://sites.google.com/site/d3iidademo/02_barchart)
+[ライブデモ](https://takamitsu-iida.github.io/d3iida/02_barChart.html)
 
 
 ## 03_lineChart.html
 
 ラインチャートをモジュール化したものです。
 
-[ライブデモ](https://sites.google.com/site/d3iidademo/03_linechart)
+[ライブデモ](https://takamitsu-iida.github.io/d3iida/03_lineChart.html)
 
 
 ## 04_pieChart.html
 
 パイチャートをモジュール化したものです。
 
-[ライブデモ](https://sites.google.com/site/d3iidademo/04_piechart)
+[ライブデモ](https://takamitsu-iida.github.io/d3iida/04_pieChart.html)
 
 
 ## 05_radioButton.html
 
 ラジオボタンをモジュール化したものです。20_mapChart.htmlで使っているものです。
 
-[ライブデモ](https://sites.google.com/site/d3iidademo/05_radiobutton)
+[ライブデモ](https://takamitsu-iida.github.io/d3iida/05_radioButton.html)
 
 
 ## 06_slider.html
 
 スライダにボタンを付けたものです。組み込み用です。
 
-[ライブデモ](https://sites.google.com/site/d3iidademo/06_slider)
+[ライブデモ](https://takamitsu-iida.github.io/d3iida/06_slider.html)
 
 
 ## 07_vhover.html
 
 クリックもドラッグも不要、マウスオーバーだけでデータを選択します。組み込み用です。
 
-[ライブデモ](https://sites.google.com/site/d3iidademo/07_vhover)
+[ライブデモ](https://takamitsu-iida.github.io/d3iida/07_vhover.html)
 
 
 ## 08_vhover2.html
 
 自走するvhover。クリックでトランジションを開始・停止します。組み込み用です。
 
-[ライブデモ](https://sites.google.com/site/d3iidademo/08_vhover2)
+[ライブデモ](https://takamitsu-iida.github.io/d3iida/08_vhover2.html)
 
 
 ## 11_multiLineChart.html
@@ -95,7 +95,7 @@ d3.select('#hello').datum(dataset).call(hello);
 応用編です。
 この程度のグラフを書くのにこんなにも大量のコードを書かないけないとすると、ちょっと考えてしまいます。
 
-[ライブデモ](https://sites.google.com/site/d3iidademo/11_multilinechart)
+[ライブデモ](https://takamitsu-iida.github.io/d3iida/11_multiLineChart.html)
 
 
 ## 12_sliderChart.html
@@ -103,7 +103,7 @@ d3.select('#hello').datum(dataset).call(hello);
 応用編です。
 スライダー付きのライン＋エリア・チャートです。
 
-[ライブデモ](https://sites.google.com/site/d3iidademo/12_sliderchart)
+[ライブデモ](https://takamitsu-iida.github.io/d3iida/12_sliderChart.html)
 
 
 ## 13_tweenChart.html
@@ -114,7 +114,7 @@ d3.select('#hello').datum(dataset).call(hello);
 太郎君はsin(x)上を、花子さんはcos(x)上を同じ速度で歩きます。
 二人はどこで出会うでしょうか。
 
-[答えはこちら](https://sites.google.com/site/d3iidademo/13_tweenchart)
+[答えはこちら](https://takamitsu-iida.github.io/d3iida/13_tweenChart.html)
 
 
 ## 20_mapChart.html
@@ -123,7 +123,7 @@ d3.select('#hello').datum(dataset).call(hello);
 ズーム処理とブラシ処理の両立でかなり悩みました。
 ラジオボタンとテーブル表示もd3.jsで実装しています。
 
-[ライブデモ](https://sites.google.com/site/d3iidademo/20_mapchart)
+[ライブデモ](https://takamitsu-iida.github.io/d3iida/20_mapChart.html)
 
 
 ## 21_populationMap.html
@@ -131,4 +131,4 @@ d3.select('#hello').datum(dataset).call(hello);
 都道府県別人口増加率を年別に表示します。
 人口が増加しているのはごく一部の都会だけだということが、よくわかります。
 
-[ライブデモ](https://sites.google.com/site/d3iidademo/21_populationmap)
+[ライブデモ](https://takamitsu-iida.github.io/d3iida/21_populationMap.html)
